@@ -18,6 +18,7 @@ export default function AdminSettingsPage() {
   // Local inputs grouped
   const [siteName, setSiteName] = useState('');
   const [siteDescription, setSiteDescription] = useState('');
+  const [faviconUrl, setFaviconUrl] = useState('');
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [autoApproveComments, setAutoApproveComments] = useState(false);
   const [minChapterLength, setMinChapterLength] = useState(500);
@@ -55,6 +56,9 @@ export default function AdminSettingsPage() {
               break;
             case 'site_description':
               setSiteDescription(item.value);
+              break;
+            case 'favicon_url':
+              setFaviconUrl(item.value);
               break;
             case 'maintenance_mode':
               setMaintenanceMode(item.value === 'true');
@@ -97,6 +101,7 @@ export default function AdminSettingsPage() {
         settings: [
           { key: 'site_name', value: siteName },
           { key: 'site_description', value: siteDescription },
+          { key: 'favicon_url', value: faviconUrl },
           { key: 'maintenance_mode', value: String(maintenanceMode) },
           { key: 'auto_approve_comments', value: String(autoApproveComments) },
           { key: 'min_chapter_length', value: String(minChapterLength) },
@@ -130,6 +135,28 @@ export default function AdminSettingsPage() {
     setTimeout(() => {
       setToastMessage('');
     }, 3000);
+  };
+
+  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate size (500KB)
+    if (file.size > 500 * 1024) {
+      alert('Kích thước ảnh quá lớn. Vui lòng chọn ảnh dưới 500KB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        setFaviconUrl(event.target.result as string);
+      }
+    };
+    reader.readAsDataURL(file);
+    
+    // Reset file input value to allow uploading the same file again if removed
+    e.target.value = '';
   };
 
   if (error && error.includes('quyền truy cập')) {
@@ -217,6 +244,49 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setSiteDescription(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl p-3.5 text-xs outline-none transition-all h-24 resize-none"
               />
+            </div>
+
+            {/* Favicon URL */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold text-gray-650 uppercase tracking-wide">Favicon (Icon Tab)</label>
+              <div className="flex items-center gap-4">
+                {faviconUrl ? (
+                  <div className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={faviconUrl} alt="Favicon Preview" className="w-12 h-12 object-contain rounded-xl bg-gray-50 border border-gray-200 p-1 shadow-sm" />
+                    <button
+                      type="button"
+                      onClick={() => setFaviconUrl('')}
+                      className="absolute -top-2 -right-2 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+                      title="Xóa ảnh"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="w-12 h-12 rounded-xl bg-gray-50 border border-gray-200 border-dashed flex items-center justify-center text-gray-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                  </div>
+                )}
+                
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/x-icon, image/svg+xml"
+                    id="favicon-upload"
+                    className="hidden"
+                    onChange={handleFaviconUpload}
+                  />
+                  <label
+                    htmlFor="favicon-upload"
+                    className="cursor-pointer inline-flex items-center gap-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold py-2 px-4 rounded-lg transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+                    Tải ảnh từ máy
+                  </label>
+                  <p className="text-[10px] text-gray-500 mt-1.5">Hỗ trợ PNG, JPG, ICO, SVG. Tối đa 500KB.</p>
+                </div>
+              </div>
             </div>
 
             {/* Maintenance Mode Toggle */}

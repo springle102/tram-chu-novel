@@ -301,7 +301,7 @@ export default function AdminDashboardPage() {
             <div className="lg:col-span-2 bg-white border border-gray-150 rounded-2xl shadow-sm p-6 space-y-4">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <h3 className="text-lg font-bold text-gray-800">Thành viên mới gia nhập</h3>
-                <a href="/admin/users" className="text-xs font-semibold text-purple-600 hover:text-purple-700">Xem tất cả</a>
+                <a href="/admin/readers" className="text-xs font-semibold text-purple-600 hover:text-purple-700">Xem tất cả</a>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">

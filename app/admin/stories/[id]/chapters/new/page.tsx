@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { fetchAdmin, getAdminUser } from '../../../utils';
+import { fetchAdmin, getAdminUser } from '@/app/admin/utils';
 
 export default function NewChapterPage() {
   const router = useRouter();

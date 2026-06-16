@@ -10,6 +10,7 @@ export interface Story {
   rating: number;
   chapterCount: number;
   slug?: string;
+  categories?: { id: string; name: string }[];
 }
 
 export interface User {
@@ -36,6 +37,7 @@ export interface StoryCardProps {
   author: string;
   rating: number;
   chapterCount: number;
+  categories?: { id: string; name: string }[];
 }
 
 export interface StoryGridProps {

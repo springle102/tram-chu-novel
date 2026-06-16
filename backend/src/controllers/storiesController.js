@@ -42,11 +42,10 @@ async function getAllStories(req, res, next) {
         s.chapter_count,
         s.created_at,
         s.updated_at,
-        u.username AS author_name,
-        COALESCE(ap.pen_name, u.username) AS author_display_name
+        a.pen_name AS author_name,
+        a.pen_name AS author_display_name
       FROM stories s
-      INNER JOIN users u ON s.author_id = u.id
-      LEFT JOIN author_profiles ap ON u.id = ap.user_id
+      INNER JOIN authors a ON s.author_id = a.id
       ORDER BY s.created_at DESC
       LIMIT $1 OFFSET $2`,
       [limit, offset]
@@ -100,8 +99,8 @@ async function getLatestStories(req, res, next) {
         s.rating,
         s.chapter_count,
         s.updated_at,
-        u.username AS author_name,
-        COALESCE(ap.pen_name, u.username) AS author_display_name,
+        a.pen_name AS author_name,
+        a.pen_name AS author_display_name,
         (
           SELECT COALESCE(json_agg(json_build_object('id', cat.id, 'name', cat.name)), '[]'::json)
           FROM story_categories sc
@@ -109,8 +108,7 @@ async function getLatestStories(req, res, next) {
           WHERE sc.story_id = s.id
         ) AS categories
       FROM stories s
-      INNER JOIN users u ON s.author_id = u.id
-      LEFT JOIN author_profiles ap ON u.id = ap.user_id
+      INNER JOIN authors a ON s.author_id = a.id
       ORDER BY s.updated_at DESC
       LIMIT $1 OFFSET $2
     `;
@@ -177,11 +175,11 @@ async function getStoryBySlug(req, res, next) {
         s.chapter_count,
         s.created_at,
         s.updated_at,
-        u.id          AS author_id,
-        u.username    AS author_username,
-        u.avatar_url  AS author_avatar,
-        COALESCE(ap.pen_name, u.username) AS author_display_name,
-        ap.bio        AS author_bio,
+        a.id          AS author_id,
+        a.pen_name    AS author_username,
+        a.avatar_url  AS author_avatar,
+        a.pen_name    AS author_display_name,
+        a.bio         AS author_bio,
         (
           SELECT COALESCE(json_agg(json_build_object('id', cat.id, 'name', cat.name)), '[]'::json)
           FROM story_categories sc
@@ -189,8 +187,7 @@ async function getStoryBySlug(req, res, next) {
           WHERE sc.story_id = s.id
         ) AS categories
       FROM stories s
-      INNER JOIN users u ON s.author_id = u.id
-      LEFT JOIN author_profiles ap ON u.id = ap.user_id
+      INNER JOIN authors a ON s.author_id = a.id
       WHERE s.slug = $1
     `;
 
@@ -285,9 +282,9 @@ async function createStory(req, res, next) {
       });
     }
 
-    // ── Kiểm tra author tồn tại và có role = 'author' ──
+    // ── Kiểm tra author tồn tại ──
     const authorCheck = await db.query(
-      `SELECT id, role FROM users WHERE id = $1`,
+      `SELECT id FROM authors WHERE id = $1`,
       [authorId]
     );
 
@@ -295,13 +292,6 @@ async function createStory(req, res, next) {
       return res.status(404).json({
         success: false,
         error: "Không tìm thấy tác giả với ID này.",
-      });
-    }
-
-    if (authorCheck.rows[0].role !== "author") {
-      return res.status(403).json({
-        success: false,
-        error: "User này không có quyền tác giả. Chỉ user có role 'author' mới được tạo truyện.",
       });
     }
 

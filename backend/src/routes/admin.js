@@ -60,4 +60,9 @@ router.delete('/comments/:id', requireAdmin, adminController.deleteComment);
 router.get('/settings', adminController.getSettings);
 router.put('/settings', requireAdmin, adminController.updateSettings);
 
+// ── Notifications ──
+router.get('/notifications', adminController.getNotifications);
+router.put('/notifications/read-all', adminController.markAllNotificationsRead);
+router.put('/notifications/:id/read', adminController.markNotificationRead);
+
 module.exports = router;

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
+import logoImg from "@/app/logo.png";
 import type { HeaderProps } from "@/app/types";
 
 // ===========================
@@ -163,27 +165,24 @@ export default function Header({
       id="main-header"
       className="sticky top-0 z-50 bg-gradient-to-r from-indigo-950 via-purple-900 to-violet-900 shadow-lg"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         {/* ── Logo (Left) ── */}
         <a
           href="/"
           id="logo-link"
-          className="flex items-center gap-2 group transition-all duration-300 shrink-0"
+          className="flex items-center group transition-all duration-300 shrink-0 ml-4"
         >
-          <div className="text-purple-300 drop-shadow-[0_0_6px_rgba(192,132,252,0.4)] group-hover:text-purple-200 group-hover:drop-shadow-[0_0_10px_rgba(192,132,252,0.7)] transition-all duration-300">
-            <BookIcon />
+          <div className="drop-shadow-[0_0_6px_rgba(192,132,252,0.4)] group-hover:drop-shadow-[0_0_10px_rgba(192,132,252,0.7)] transition-all duration-300">
+            <Image 
+              src={logoImg} 
+              alt="Novel Violet Logo" 
+              width={200}
+              height={75}
+              className="object-contain"
+              style={{ height: '75px', width: 'auto' }}
+              priority
+            />
           </div>
-          <span
-            className="text-lg font-extrabold tracking-tight sm:text-xl transition-all duration-300 group-hover:opacity-95"
-            style={{
-              background: "linear-gradient(135deg, #e9d5ff 0%, #f0abfc 50%, #c084fc 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              filter: "drop-shadow(0 0 8px rgba(192, 132, 252, 0.25))",
-            }}
-          >
-            Novel Violet
-          </span>
         </a>
 
         {/* ── Search Bar & Category Filter (Center) ── */}

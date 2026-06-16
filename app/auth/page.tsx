@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import logoImg from "@/app/logo.png";
 
 // ===========================
 // Types
@@ -661,33 +663,17 @@ export default function AuthPage() {
         <div className="w-full max-w-md auth-animate-in">
           {/* Logo */}
           <div className="mb-8 text-center">
-            <a href="/" className="inline-flex items-center gap-3 group">
-              <svg
-                width="36"
-                height="36"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-purple-300 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_0_12px_rgba(192,132,252,0.8)]"
-              >
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-                <path d="M8 7h6" />
-                <path d="M8 11h4" />
-              </svg>
-              <span
-                className="text-3xl font-extrabold tracking-tight"
-                style={{
-                  background: "linear-gradient(135deg, #e9d5ff 0%, #f0abfc 50%, #c084fc 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent",
-                  filter: "drop-shadow(0 0 10px rgba(192, 132, 252, 0.3))",
-                }}
-              >
-                Novel Violet
-              </span>
+            <a href="/" className="flex items-center group transition-transform duration-300 hover:scale-105 justify-center">
+              <div className="relative w-48 h-16 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(192,132,252,0.8)] transition-all duration-300">
+                <Image 
+                  src={logoImg} 
+                  alt="Novel Violet Logo" 
+                  fill
+                  sizes="200px"
+                  className="object-contain"
+                  priority
+                />
+              </div>
             </a>
           </div>
 

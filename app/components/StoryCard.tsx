@@ -73,6 +73,7 @@ export default function StoryCard({
   author,
   rating,
   chapterCount,
+  categories,
 }: StoryCardProps) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-lg bg-card-bg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
@@ -109,12 +110,31 @@ export default function StoryCard({
         </h3>
 
         {/* Author */}
-        <p className="mb-1.5 text-xs text-text-muted truncate">{author}</p>
+        <p className="mb-1 text-xs text-text-muted truncate">{author}</p>
+
+        {/* Categories */}
+        {categories && categories.length > 0 && (
+          <div className="mb-1.5 flex flex-wrap gap-1">
+            {categories.slice(0, 2).map((cat) => (
+              <span
+                key={cat.id}
+                className="inline-block px-1.5 py-0.5 rounded text-[9px] font-medium bg-purple-50 text-purple-600 border border-purple-100"
+              >
+                {cat.name}
+              </span>
+            ))}
+            {categories.length > 2 && (
+              <span className="inline-block px-1.5 py-0.5 rounded text-[9px] font-medium bg-gray-50 text-gray-500 border border-gray-200">
+                +{categories.length - 2}
+              </span>
+            )}
+          </div>
+        )}
 
         {/* Chapter count */}
         <div className="flex items-center gap-1.5">
           <BookOpenIcon />
-          <span className="text-xs text-text-light">
+          <span className="text-[10px] text-text-light">
             {chapterCount} chương
           </span>
         </div>

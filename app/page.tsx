@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import logoImg from "@/app/logo.png";
 import type { Story, User } from "@/app/types";
 import Header from "@/app/components/Header";
 import StoryGrid from "@/app/components/StoryGrid";
@@ -49,6 +51,7 @@ export default function Home() {
           rating: Number(s.rating) || 0,
           chapterCount: s.chapter_count || 0,
           slug: s.slug,
+          categories: s.categories || [],
         }));
         
         setStories(mappedStories);
@@ -112,7 +115,7 @@ export default function Home() {
       />
 
       {/* ── Main Content ── */}
-      <main className="mx-auto w-full max-w-7xl flex-1 px-4 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-4 sm:px-6 lg:px-8">
         <StoryGrid stories={stories} />
         <Pagination
           currentPage={currentPage}
@@ -123,23 +126,17 @@ export default function Home() {
 
       {/* ── Footer ── */}
       <footer className="border-t border-border-light bg-white">
-        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex items-center gap-2 text-sm text-text-muted">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-primary"
-              >
-                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
-              </svg>
-              <span className="font-semibold text-primary">Novel Violet</span>
+            <div className="flex items-center gap-3 text-sm text-text-muted">
+              <Image 
+                src={logoImg} 
+                alt="Novel Violet Logo" 
+                width={140}
+                height={44}
+                className="object-contain"
+                style={{ height: '44px', width: 'auto' }}
+              />
               <span>— Đọc truyện tiểu thuyết online</span>
             </div>
             <p className="text-xs text-text-light">

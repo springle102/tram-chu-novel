@@ -72,7 +72,7 @@ export default function StoryGrid({ stories }: StoryGridProps) {
       {stories.length === 0 ? (
         <EmptyState />
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-7">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-5">
           {stories.map((story) => (
             <StoryCard
               key={story.id}
@@ -81,6 +81,7 @@ export default function StoryGrid({ stories }: StoryGridProps) {
               author={story.author}
               rating={story.rating}
               chapterCount={story.chapterCount}
+              categories={story.categories}
             />
           ))}
         </div>

@@ -27,9 +27,16 @@ export default function ProfilePage() {
   const [displayName, setDisplayName] = useState("Độc Giả 01");
   const [avatarUrl, setAvatarUrl] = useState("https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80");
   const [username, setUsername] = useState("user_reader_01");
+  const [email, setEmail] = useState("user_reader_01@gmail.com");
+
+  // Temp states for Edit Modal popup
+  const [tempDisplayName, setTempDisplayName] = useState("");
+  const [tempAvatarUrl, setTempAvatarUrl] = useState("");
+  const [tempUsername, setTempUsername] = useState("");
+  const [tempEmail, setTempEmail] = useState("");
+  const [tempPassword, setTempPassword] = useState("");
   
-  const [isEditing, setIsEditing] = useState(true); // Default to editing mode to match image
-  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   
@@ -80,18 +87,26 @@ export default function ProfilePage() {
         // Load info from db/storage format
         setDisplayName(parsed.displayName || parsed.fullName || "Độc Giả 01");
         setAvatarUrl(parsed.avatarUrl || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80");
-        setUsername(parsed.email ? parsed.email.split("@")[0] : "user_reader_01");
+        setUsername(parsed.username || (parsed.email ? parsed.email.split("@")[0] : "user_reader_01"));
+        setEmail(parsed.email || "user_reader_01@gmail.com");
       } catch (err) {
         console.error("Failed to parse user details:", err);
       }
     } else {
       // Simulate demo user if not logged in
       setIsLoggedIn(true);
-      setCurrentUser({
+      const demoUser = {
         id: "demo-id",
         displayName: "Độc Giả 01",
-        avatarUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80"
-      });
+        avatarUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80",
+        username: "user_reader_01",
+        email: "user_reader_01@gmail.com"
+      };
+      setCurrentUser(demoUser as any);
+      setDisplayName(demoUser.displayName);
+      setAvatarUrl(demoUser.avatarUrl);
+      setUsername(demoUser.username);
+      setEmail(demoUser.email);
     }
 
     fetchBookshelfData();
@@ -108,20 +123,18 @@ export default function ProfilePage() {
   }, 0);
 
   // ── Handlers ──
-  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleTempAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Kích thước ảnh đại diện không được vượt quá 2MB.' });
-      setShowAvatarModal(false);
+      alert("Kích thước ảnh đại diện không được vượt quá 2MB.");
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setAvatarUrl(reader.result as string);
-      setShowAvatarModal(false);
+      setTempAvatarUrl(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
@@ -138,14 +151,22 @@ export default function ProfilePage() {
     router.push("/");
   }
 
+  function handleOpenEditModal() {
+    setTempDisplayName(displayName);
+    setTempAvatarUrl(avatarUrl);
+    setTempUsername(username);
+    setTempEmail(email);
+    setTempPassword("");
+    setShowEditModal(true);
+  }
+
   function handleCancel() {
-    // Reset inputs
-    if (currentUser) {
-      setDisplayName(currentUser.displayName || "Độc Giả 01");
-      setAvatarUrl(currentUser.avatarUrl || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80");
-    }
-    setMessage({ type: "success", text: "Đã hủy các thay đổi chưa lưu." });
-    setTimeout(() => setMessage(null), 3000);
+    setTempDisplayName("");
+    setTempAvatarUrl("");
+    setTempUsername("");
+    setTempEmail("");
+    setTempPassword("");
+    setShowEditModal(false);
   }
 
   async function handleSaveChanges(e: React.FormEvent) {
@@ -153,8 +174,18 @@ export default function ProfilePage() {
     setMessage(null);
     setIsSaving(true);
 
-    if (!displayName.trim()) {
+    if (!tempDisplayName.trim()) {
       setMessage({ type: "error", text: "Tên không được bỏ trống." });
+      setIsSaving(false);
+      return;
+    }
+    if (!tempUsername.trim()) {
+      setMessage({ type: "error", text: "Username không được bỏ trống." });
+      setIsSaving(false);
+      return;
+    }
+    if (!tempEmail.trim()) {
+      setMessage({ type: "error", text: "Email không được bỏ trống." });
       setIsSaving(false);
       return;
     }
@@ -173,8 +204,11 @@ export default function ProfilePage() {
           },
           body: JSON.stringify({
             userId: currentUser.id,
-            username: displayName.trim(),
-            avatarUrl: avatarUrl
+            displayName: tempDisplayName.trim(),
+            username: tempUsername.trim(),
+            email: tempEmail.trim(),
+            password: tempPassword ? tempPassword : undefined,
+            avatarUrl: tempAvatarUrl
           })
         });
 
@@ -187,15 +221,25 @@ export default function ProfilePage() {
       // Sync local storage
       const updatedUser = {
         ...currentUser,
-        displayName: displayName.trim(),
-        avatarUrl: avatarUrl
+        displayName: tempDisplayName.trim(),
+        avatarUrl: tempAvatarUrl,
+        username: tempUsername.trim(),
+        email: tempEmail.trim()
       };
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser as User);
+      setCurrentUser(updatedUser as any);
+
+      // Apply changes to main states
+      setDisplayName(tempDisplayName.trim());
+      setAvatarUrl(tempAvatarUrl);
+      setUsername(tempUsername.trim());
+      setEmail(tempEmail.trim());
 
       // Dispatch event to update other components
       window.dispatchEvent(new Event("storage"));
 
+      setShowEditModal(false);
+      setTempPassword("");
       setMessage({ type: "success", text: "Cập nhật hồ sơ thành công!" });
       setTimeout(() => setMessage(null), 4000);
     } catch (err) {
@@ -203,13 +247,23 @@ export default function ProfilePage() {
       // Fallback update local storage if api is offline
       const updatedUser = {
         ...currentUser,
-        displayName: displayName.trim(),
-        avatarUrl: avatarUrl
+        displayName: tempDisplayName.trim(),
+        avatarUrl: tempAvatarUrl,
+        username: tempUsername.trim(),
+        email: tempEmail.trim()
       };
       localStorage.setItem("user", JSON.stringify(updatedUser));
-      setCurrentUser(updatedUser as User);
+      setCurrentUser(updatedUser as any);
+
+      setDisplayName(tempDisplayName.trim());
+      setAvatarUrl(tempAvatarUrl);
+      setUsername(tempUsername.trim());
+      setEmail(tempEmail.trim());
+
       window.dispatchEvent(new Event("storage"));
 
+      setShowEditModal(false);
+      setTempPassword("");
       setMessage({ type: "success", text: "Lưu cục bộ thành công! (Môi trường máy chủ ngoại tuyến)" });
       setTimeout(() => setMessage(null), 4000);
     } finally {
@@ -278,11 +332,6 @@ export default function ProfilePage() {
             <h1 className="text-3xl font-extrabold tracking-wider text-white uppercase drop-shadow-[0_0_12px_rgba(192,132,252,0.4)]">
               Hồ Sơ Độc Giả
             </h1>
-            {isEditing && (
-              <span className="mt-2 inline-block rounded-full bg-yellow-100 px-3.5 py-1 text-xs font-bold text-yellow-800 border border-yellow-200 shadow-sm animate-pulse">
-                Chế độ Chỉnh sửa Đang Hoạt động
-              </span>
-            )}
           </div>
 
           {/* ── Main Card Container ── */}
@@ -303,13 +352,13 @@ export default function ProfilePage() {
             )}
 
             {/* ── Top Section (Info & Stats) ── */}
-            <form onSubmit={handleSaveChanges} className="flex flex-col gap-6 md:flex-row md:items-center">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center">
               
               {/* Avatar Column */}
               <div className="flex flex-col items-center gap-3 shrink-0">
                 <div className="relative">
                   {/* Decorative glowing ring */}
-                  <div className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-tr from-purple-500 via-pink-400 to-purple-500 animate-spin" style={{ animationDuration: "10s" }} />
+                  <div className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-tr from-purple-50 via-pink-400 to-purple-500 animate-spin" style={{ animationDuration: "10s" }} />
                   {/* Avatar wrapper */}
                   <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-purple-50 shadow-md">
                     <img 
@@ -319,37 +368,26 @@ export default function ProfilePage() {
                     />
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowAvatarModal(true)}
-                  className="rounded-full bg-purple-100 px-3.5 py-1 text-xs font-semibold text-purple-700 border border-purple-200 transition-colors hover:bg-purple-200"
-                >
-                  Đổi ảnh đại diện
-                </button>
               </div>
 
               {/* Info Column */}
               <div className="flex-1 space-y-4">
                 {/* Name field */}
-                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
-                  <span className="text-base font-bold text-purple-950 sm:w-20 shrink-0">Tên:</span>
-                  <input
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
-                    disabled={!isEditing}
-                    placeholder="Nhập họ tên..."
-                    className="w-full max-w-lg rounded-xl border-2 border-purple-200 bg-purple-50/50 px-4 py-2 text-base font-semibold text-purple-950 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-4 focus:ring-purple-500/10 disabled:border-transparent disabled:bg-transparent disabled:px-0 disabled:py-0"
-                  />
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base font-bold text-purple-950 sm:w-24 shrink-0">Tên:</span>
+                  <span className="text-base font-semibold text-purple-950/80 px-1">{displayName}</span>
                 </div>
 
                 {/* Username field */}
-                <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center">
-                  <span className="text-base font-bold text-purple-950 sm:w-20 shrink-0">Username:</span>
-                  <span className="text-base font-semibold text-purple-950/70 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">
-                    @{username}
-                  </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base font-bold text-purple-950 sm:w-24 shrink-0">Username:</span>
+                  <span className="text-base font-semibold text-purple-950/80 px-1">@{username}</span>
+                </div>
+
+                {/* Email field */}
+                <div className="flex items-center gap-1.5">
+                  <span className="text-base font-bold text-purple-950 sm:w-24 shrink-0">Email:</span>
+                  <span className="text-base font-semibold text-purple-950/80 px-1">{email}</span>
                 </div>
 
                 {/* Stats Row (Computed from Real DB Stories) */}
@@ -368,52 +406,28 @@ export default function ProfilePage() {
                   </div>
                 </div>
 
-                {/* Save & Cancel buttons */}
-                {isEditing && (
-                  <div className="flex items-center gap-3 pt-2">
-                    <button
-                      type="submit"
-                      disabled={isSaving}
-                      className="rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-6 py-2 text-sm font-bold text-white shadow-md shadow-purple-500/20 transition-all hover:translate-y-[-1px] hover:shadow-lg hover:shadow-purple-500/35 active:translate-y-[1px] disabled:opacity-50"
-                    >
-                      {isSaving ? "Đang lưu..." : "Lưu Thay Đổi"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="rounded-full bg-gray-200 px-5 py-2 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-300"
-                    >
-                      Hủy
-                    </button>
-                  </div>
-                )}
+                {/* Edit Button */}
+                <div className="flex items-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={handleOpenEditModal}
+                    className="rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-6 py-2 text-sm font-bold text-white shadow-md shadow-purple-500/20 transition-all hover:translate-y-[-1px] hover:shadow-lg hover:shadow-purple-500/35 active:translate-y-[1px]"
+                  >
+                    Chỉnh Sửa Thông Tin
+                  </button>
+                </div>
               </div>
-            </form>
+            </div>
 
             {/* ── Personal Bookshelf Section ── */}
             <div className="mt-8 border-t-2 border-purple-100 pt-6">
               
               {/* Shelf Header */}
-              <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-7 w-1.5 rounded-full bg-gradient-to-b from-purple-600 to-fuchsia-500" />
-                  <h2 className="text-xl font-extrabold text-purple-950 uppercase tracking-wide">
-                    Tủ Sách Cá Nhân
-                  </h2>
-                </div>
-
-                {/* Shelf Rank Selector / Badge */}
-                <div className="flex items-center gap-1.5 self-start sm:self-center">
-                  <div className="inline-flex items-center gap-1.5 rounded-full bg-purple-50 border border-purple-200/60 px-3 py-1.5 text-xs font-bold text-purple-800 shadow-sm">
-                    <span className="h-2 w-2 rounded-full bg-purple-500 animate-ping" />
-                    <img 
-                      src={avatarUrl} 
-                      alt="" 
-                      className="h-4 w-4 rounded-full"
-                    />
-                    <span>Mọt Truyện</span>
-                  </div>
-                </div>
+              <div className="mb-6 flex items-center gap-3">
+                <div className="h-7 w-1.5 rounded-full bg-gradient-to-b from-purple-600 to-fuchsia-500" />
+                <h2 className="text-xl font-extrabold text-purple-950 uppercase tracking-wide">
+                  Tủ Sách Cá Nhân
+                </h2>
               </div>
 
               {/* Shelf Books Grid */}
@@ -430,20 +444,7 @@ export default function ProfilePage() {
               ) : (
                 <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
                   
-                  {/* Special Rank Badge Card */}
-                  <div className="group flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-purple-300 bg-purple-50/70 p-4 text-center transition-all duration-300 hover:border-purple-400 hover:bg-purple-50">
-                    <div className="relative mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-purple-100 text-purple-600 shadow-inner group-hover:scale-110 transition-transform">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                    </div>
-                    <h3 className="text-sm font-black text-purple-950 uppercase tracking-tight">
-                      Mọt Truyện
-                    </h3>
-                    <span className="mt-1 text-[10px] font-bold text-purple-700/80 bg-purple-100/60 px-2 py-0.5 rounded-full">
-                      Thần Đọc
-                    </span>
-                  </div>
+
 
                   {/* Books from Database */}
                   {bookshelfStories.map((book, idx) => {
@@ -513,70 +514,136 @@ export default function ProfilePage() {
         </main>
       </div>
 
-      {/* ── Avatar Choice Modal ── */}
-      {showAvatarModal && (
+      {/* ── Edit Info Popup Modal ── */}
+      {showEditModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-3xl border border-purple-500/20 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+          <div className="w-full max-w-lg rounded-3xl border border-purple-500/20 bg-white p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 overflow-y-auto max-h-[90vh]">
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-lg font-bold text-purple-950">Chọn ảnh đại diện mẫu</h3>
+              <h3 className="text-xl font-extrabold text-purple-950 uppercase tracking-wide">Chỉnh sửa thông tin</h3>
               <button 
-                onClick={() => setShowAvatarModal(false)}
+                onClick={handleCancel}
                 className="rounded-full p-1.5 hover:bg-gray-100 text-gray-500 transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            {/* Template Grid */}
-            <div className="grid grid-cols-3 gap-3">
-              {AVATAR_TEMPLATES.map((avatar) => (
-                <button
-                  key={avatar.id}
-                  type="button"
-                  onClick={() => {
-                    setAvatarUrl(avatar.url);
-                    setShowAvatarModal(false);
-                  }}
-                  className="group flex flex-col items-center gap-1.5 rounded-2xl border-2 border-transparent p-1 transition-all hover:border-purple-400 hover:bg-purple-50/50"
-                >
-                  <div className="h-16 w-16 overflow-hidden rounded-full border border-purple-100 group-hover:scale-105 transition-transform">
-                    <img src={avatar.url} alt={avatar.name} className="h-full w-full object-cover" />
+            <form onSubmit={handleSaveChanges} className="space-y-4">
+              
+              {/* Avatar Section */}
+              <div className="flex flex-col items-center gap-3 py-3 border-b border-purple-100">
+                <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-purple-300 shadow-md">
+                  <img 
+                    src={tempAvatarUrl || avatarUrl} 
+                    alt="Preview avatar" 
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                
+                {/* Choose Avatar Templates */}
+                <div className="w-full">
+                  <span className="block text-xs font-bold text-purple-950/70 mb-2 text-center">Chọn ảnh mẫu hoặc tải ảnh của bạn:</span>
+                  <div className="grid grid-cols-6 gap-2 justify-center mb-3">
+                    {AVATAR_TEMPLATES.map((avatar) => (
+                      <button
+                        key={avatar.id}
+                        type="button"
+                        onClick={() => setTempAvatarUrl(avatar.url)}
+                        className={`h-9 w-9 overflow-hidden rounded-full border-2 transition-all hover:scale-105 ${
+                          tempAvatarUrl === avatar.url ? "border-purple-600 ring-2 ring-purple-500/20" : "border-transparent"
+                        }`}
+                        title={avatar.name}
+                      >
+                        <img src={avatar.url} alt={avatar.name} className="h-full w-full object-cover" />
+                      </button>
+                    ))}
                   </div>
-                  <span className="text-[10px] font-bold text-purple-950/70 text-center leading-tight">
-                    {avatar.name}
-                  </span>
+
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleTempAvatarFileChange}
+                    className="block w-full text-xs text-gray-500
+                      file:mr-4 file:py-1.5 file:px-3
+                      file:rounded-xl file:border-0
+                      file:text-xs file:font-semibold
+                      file:bg-purple-50 file:text-purple-700
+                      hover:file:bg-purple-100
+                      cursor-pointer focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* Form Input Fields */}
+              <div className="space-y-3">
+                {/* Name */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-purple-950/70">Tên hiển thị:</label>
+                  <input
+                    type="text"
+                    value={tempDisplayName}
+                    onChange={(e) => setTempDisplayName(e.target.value)}
+                    placeholder="Nhập họ tên hiển thị..."
+                    className="w-full rounded-xl border border-purple-200 bg-purple-50/20 px-4 py-2 text-sm font-semibold text-purple-950 outline-none transition-all focus:border-purple-500 focus:bg-white"
+                  />
+                </div>
+
+                {/* Username */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-purple-950/70">Username:</label>
+                  <input
+                    type="text"
+                    value={tempUsername}
+                    onChange={(e) => setTempUsername(e.target.value)}
+                    placeholder="Nhập username của bạn..."
+                    className="w-full rounded-xl border border-purple-200 bg-purple-50/20 px-4 py-2 text-sm font-semibold text-purple-950 outline-none transition-all focus:border-purple-500 focus:bg-white"
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-purple-950/70">Email:</label>
+                  <input
+                    type="email"
+                    value={tempEmail}
+                    onChange={(e) => setTempEmail(e.target.value)}
+                    placeholder="Nhập địa chỉ email..."
+                    className="w-full rounded-xl border border-purple-200 bg-purple-50/20 px-4 py-2 text-sm font-semibold text-purple-950 outline-none transition-all focus:border-purple-500 focus:bg-white"
+                  />
+                </div>
+
+                {/* Password */}
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-bold text-purple-950/70">Mật khẩu mới (Bỏ trống nếu không muốn đổi):</label>
+                  <input
+                    type="password"
+                    value={tempPassword}
+                    onChange={(e) => setTempPassword(e.target.value)}
+                    placeholder="Nhập mật khẩu mới..."
+                    className="w-full rounded-xl border border-purple-200 bg-purple-50/20 px-4 py-2 text-sm font-semibold text-purple-950 outline-none transition-all focus:border-purple-500 focus:bg-white"
+                  />
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="mt-6 flex justify-end gap-3 pt-3 border-t border-purple-50">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="rounded-full bg-gray-100 px-5 py-2 text-xs font-bold text-gray-700 transition-colors hover:bg-gray-200"
+                >
+                  Hủy
                 </button>
-              ))}
-            </div>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-6 py-2 text-xs font-bold text-white shadow-md transition-all hover:translate-y-[-1px] active:translate-y-[1px] disabled:opacity-50"
+                >
+                  {isSaving ? "Đang lưu..." : "Lưu Thay Đổi"}
+                </button>
+              </div>
 
-            {/* Custom Input */}
-            <div className="mt-5 pt-4 border-t border-purple-100">
-              <label className="block text-xs font-bold text-purple-950/70 mb-2">
-                Hoặc tải ảnh đại diện từ máy tính (Tối đa 2MB):
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarFileChange}
-                className="block w-full text-xs text-gray-500
-                  file:mr-4 file:py-2 file:px-4
-                  file:rounded-xl file:border-0
-                  file:text-xs file:font-semibold
-                  file:bg-purple-50 file:text-purple-700
-                  hover:file:bg-purple-100
-                  cursor-pointer focus:outline-none"
-              />
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={() => setShowAvatarModal(false)}
-                className="rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-5 py-2 text-xs font-bold text-white shadow-sm"
-              >
-                Xác nhận
-              </button>
-            </div>
+            </form>
           </div>
         </div>
       )}

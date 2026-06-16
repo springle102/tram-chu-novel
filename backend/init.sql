@@ -13,6 +13,7 @@ DROP TABLE IF EXISTS bookmarks CASCADE;
 DROP TABLE IF EXISTS ratings CASCADE;
 DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS chapters CASCADE;
+DROP TABLE IF EXISTS story_categories CASCADE;
 DROP TABLE IF EXISTS stories CASCADE;
 DROP TABLE IF EXISTS categories CASCADE;
 DROP TABLE IF EXISTS authors CASCADE; -- Đã thay thế author_profiles bằng authors
@@ -271,7 +272,7 @@ CREATE INDEX IF NOT EXISTS idx_reports_status ON reports (status);
 -- ────────────────────────────────────────────────────────────
 -- 5.7. BẢNG NOTIFICATIONS
 -- ────────────────────────────────────────────────────────────
-DO $$ BEGIN CREATE TYPE notification_type AS ENUM ('new_chapter', 'comment_reply', 'story_approved', 'story_rejected', 'system', 'report_resolved'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+DO $$ BEGIN CREATE TYPE notification_type AS ENUM ('new_chapter', 'comment_reply', 'story_approved', 'story_rejected', 'system', 'report_resolved', 'new_comment', 'new_rating', 'new_bookmark'); EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
 CREATE TABLE IF NOT EXISTS notifications (
   id            UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -336,26 +337,20 @@ CREATE TRIGGER set_stories_updated_at
   EXECUTE FUNCTION trigger_set_updated_at();
 
 -- ────────────────────────────────────────────────────────────
--- 7. DỮ LIỆU MẪU (MOCK DATA)
+-- 7. KHỞI TẠO CẤU HÌNH & TÀI KHOẢN HỆ THỐNG MẶC ĐỊNH (SYSTEM DATA)
 -- ────────────────────────────────────────────────────────────
 
--- Chèn dữ liệu mẫu cho Users (Độc giả)
-INSERT INTO users (id, username, email, password, role, avatar_url) VALUES
-('d3b07384-d113-4cf1-a5ee-a83d1c258803', 'Nguyễn Văn A', 'reader_a@gmail.com', '123456', 'reader', 'https://placehold.co/150x150/6b7280/white?text=RA'),
-('d3b07384-d113-4cf1-a5ee-a83d1c258804', 'Trần Thị B', 'reader_b@gmail.com', '123456', 'reader', 'https://placehold.co/150x150/6b7280/white?text=RB'),
-('d3b07384-d113-4cf1-a5ee-a83d1c258805', 'Lê Hoàng C', 'reader_c@gmail.com', '123456', 'reader', 'https://placehold.co/150x150/6b7280/white?text=RC')
-ON CONFLICT (email) DO NOTHING;
-
--- Chèn dữ liệu mẫu cho Admins (Quản trị viên)
+-- Chèn tài khoản Admins mặc định để quản trị viên có thể đăng nhập
 INSERT INTO admins (id, username, email, password, avatar_url) VALUES
 ('d3b07384-d113-4cf1-a5ee-a83d1c258800', 'Admin', 'admin@novelviolet.com', '123456', 'https://placehold.co/150x150/dc2626/white?text=AD'),
 ('d3b07384-d113-4cf1-a5ee-a83d1c25880a', 'Admin Demo', 'demoadmin@novelviolet.com', '123456', 'https://placehold.co/150x150/3b82f6/white?text=AD')
 ON CONFLICT (email) DO NOTHING;
 
--- Chèn dữ liệu mẫu cho Site Settings (cài đặt hệ thống mặc định)
+-- Chèn cấu hình hệ thống mặc định
 INSERT INTO site_settings (key, value, description) VALUES
 ('site_name', 'Novel Violet', 'Tên website'),
 ('site_description', 'Đọc truyện tiểu thuyết online', 'Mô tả website'),
+('favicon_url', 'https://placehold.co/32x32/8b5cf6/white?text=NV', 'Favicon của website'),
 ('maintenance_mode', 'false', 'Chế độ bảo trì'),
 ('auto_approve_comments', 'true', 'Tự động duyệt bình luận'),
 ('min_chapter_length', '500', 'Độ gia tối thiểu 1 chương (ký tự)'),
@@ -365,13 +360,7 @@ INSERT INTO site_settings (key, value, description) VALUES
 ('session_timeout_hours', '24', 'Thời gian hết hạn session')
 ON CONFLICT (key) DO NOTHING;
 
--- Chèn dữ liệu mẫu cho Authors (Tác giả)
-INSERT INTO authors (id, pen_name, email, password, avatar_url, bio, donation_link, total_views) VALUES
-('d3b07384-d113-4cf1-a5ee-a83d1c258801', 'Tiêu Đỉnh', 'tieuding@gmail.com', '123456', 'https://placehold.co/150x150/7c3aed/white?text=TD', 'Tác giả nổi tiếng chuyên viết dòng truyện tiên hiệp kỳ ảo tại Trung Quốc, tác phẩm tiêu biểu là Tru Tiên.', 'https://paypal.me/tieuding', 25300),
-('d3b07384-d113-4cf1-a5ee-a83d1c258802', 'Ngã Ăn Tây Hồng Thị', 'tieuho@gmail.com', '123456', 'https://placehold.co/150x150/7c3aed/white?text=TH', 'Tác giả Bạch Kim của trang mạng Qidian với các đầu sách huyền huyễn võ hiệp huyền thoại như Bàn Long, Tinh Thần Biến.', 'https://paypal.me/tieuho', 48200)
-ON CONFLICT (email) DO NOTHING;
-
--- Chèn dữ liệu mẫu cho Categories
+-- Chèn các thể loại truyện hệ thống
 INSERT INTO categories (id, name, slug) VALUES
 ('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c01', 'Tu tiên', 'tu-tien'),
 ('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c02', 'Huyền huyễn', 'huyen-huyen'),
@@ -382,33 +371,3 @@ INSERT INTO categories (id, name, slug) VALUES
 ('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c07', 'Âm mưu', 'am-muu'),
 ('c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c08', 'Ma pháp', 'ma-phap')
 ON CONFLICT (slug) DO NOTHING;
-
--- Chèn dữ liệu mẫu cho Stories
-INSERT INTO stories (id, author_id, category_id, title, slug, cover_image, description, status, view_count, rating, chapter_count) VALUES
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'd3b07384-d113-4cf1-a5ee-a83d1c258801', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c01', 'Tru Tiên Kiếp', 'tru-tien-kiep', 'https://placehold.co/400x600/7c3aed/white?text=Tru+Tien+Kiep', 'Trong phong ba thế tục tranh đoạt, thiếu niên ngây ngô Sở Tuyên Mặc tình cờ thừa kế bí pháp kiếm đạo cổ đại. Số phận đẩy đưa hắn hội ngộ với Sở Hàn Uyên - người thừa kế ma đạo chí tôn. Cả hai cùng trải qua sinh tử chí giao, đối diện với muôn vàn kiếp nạn trần thế.', 'ongoing', 8520, 4.85, 120),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'd3b07384-d113-4cf1-a5ee-a83d1c258801', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c06', 'Thương Vân Họa Quyển', 'thuong-van-hoa-quyen', 'https://placehold.co/400x600/7c3aed/white?text=Thuong+Van', 'Một bức tranh sơn hà gấm vóc nhuốm màu quyền mưu. Ở chốn triều đình gió giục mây vần, vị vương gia trẻ tuổi Sở Hàn Uyên quyết định bắt tay cùng thần y đệ nhất thiên hạ Sở Tuyên Mặc để cùng khám phá âm mưu lật đổ ngôi báu của các thế lực phản nghịch.', 'completed', 5410, 4.90, 88),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'd3b07384-d113-4cf1-a5ee-a83d1c258801', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c01', 'Phần Hương Ngoại Truyện', 'phan-huong-ngoai-truyen', 'https://placehold.co/400x600/7c3aed/white?text=Phan+Huong', 'Cuộc hành trình kỳ thú truy tìm bí bảo cổ xưa của các đệ tử Phần Hương Cốc chốn thâm sơn cùng cốc ma thú hoành hành.', 'completed', 3120, 4.70, 45),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'd3b07384-d113-4cf1-a5ee-a83d1c258802', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c02', 'Bàn Long Truyền Kỳ', 'ban-long-truyen-ky', 'https://placehold.co/400x600/7c3aed/white?text=Ban+Long', 'Thiêu niên Lâm Lôi nhặt được chiếc nhẫn đá cổ hình rồng bí ẩn từ đống đổ nát, bắt đầu bước vào con đường thức tỉnh long huyết chiến sĩ vĩ đại chiến đấu bảo vệ gia tộc.', 'ongoing', 9850, 4.80, 350),
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 'd3b07384-d113-4cf1-a5ee-a83d1c258802', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c02', 'Tinh Không Biến Thể', 'tinh-khong-bien-the', 'https://placehold.co/400x600/7c3aed/white?text=Tinh+Khong', 'Khi đại hải võ học ngưng tụ tinh thần lực, Tần Vũ mở ra con đường phá không phi thăng phi thường vượt qua chín tầng trời tinh không hiểm trở.', 'completed', 7200, 4.75, 220)
-ON CONFLICT (slug) DO NOTHING;
-
--- Chèn dữ liệu thể loại cho Stories vào bảng story_categories
-INSERT INTO story_categories (story_id, category_id) VALUES
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c01'), -- Tru Tiên Kiếp - Tu tiên
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c02'), -- Tru Tiên Kiếp - Huyền huyễn
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c06'), -- Thương Vân Họa Quyển - Cung đình
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c07'), -- Thương Vân Họa Quyển - Âm mưu
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c01'), -- Phần Hương Ngoại Truyện - Tu tiên
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c02'), -- Bàn Long Truyền Kỳ - Huyền huyễn
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c08'), -- Bàn Long Truyền Kỳ - Ma pháp
-('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380c02')  -- Tinh Không Biến Thể - Huyền huyễn
-ON CONFLICT DO NOTHING;
-
--- Chèn dữ liệu mẫu cho Comments
--- Chú ý: Ở đây ta chỉ định cột user_id hoặc author_id tùy vào người bình luận
-INSERT INTO comments (id, user_id, author_id, story_id, content, status) VALUES
-('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380e01', 'd3b07384-d113-4cf1-a5ee-a83d1c258803', NULL, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Truyện hay quá, mong tác giả ra thêm chương mới!', 'approved'),
-('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380e05', NULL, 'd3b07384-d113-4cf1-a5ee-a83d1c258801', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Cảm ơn bạn đã ủng hộ nhé!', 'approved'), -- Tác giả trả lời
-('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380e02', 'd3b07384-d113-4cf1-a5ee-a83d1c258804', NULL, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'Bàn Long quá đỉnh, đọc không muốn ngừng.', 'approved'),
-('e0eebc99-9c0b-4ef8-bb6d-6bb9bd380e03', 'd3b07384-d113-4cf1-a5ee-a83d1c258805', NULL, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'Cốt truyện cung đình rất cuốn hút!', 'pending')
-ON CONFLICT DO NOTHING;

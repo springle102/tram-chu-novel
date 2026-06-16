@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { logoutAdmin, getAdminUser } from './utils';
+import { getAdminUser, logoutAdmin } from './utils';
+import NotificationDropdown from './components/NotificationDropdown';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -258,7 +259,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Panel Content Area */}
-      <div className="flex-1 pl-64 flex flex-col min-h-screen">
+      <div className="flex-1 pl-64 flex flex-col min-h-screen min-w-0">
         {/* Header */}
         <header className="h-16 bg-white border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm">
           {/* Breadcrumb */}
@@ -282,6 +283,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </svg>
             </a>
             <div className="h-6 w-px bg-gray-200 hidden sm:block"></div>
+            
+            <NotificationDropdown />
+
             <div className="flex items-center gap-2">
               <img
                 src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.fullName || 'User')}&background=7c3aed&color=fff`}
@@ -294,7 +298,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Content Box */}
-        <main className="flex-1 p-8 bg-gray-50">
+        <main className="flex-1 p-8 bg-gray-50 min-w-0 overflow-x-hidden">
           {children}
         </main>
       </div>

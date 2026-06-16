@@ -584,7 +584,10 @@ async function updateSettings(req, res, next) {
       await client.query('BEGIN');
       for (const { key, value } of settings) {
         await client.query(
-          'UPDATE site_settings SET value = $1, updated_at = NOW(), updated_by = $2 WHERE key = $3',
+          `INSERT INTO site_settings (key, value, updated_at, updated_by)
+           VALUES ($3, $1, NOW(), $2)
+           ON CONFLICT (key) DO UPDATE 
+           SET value = EXCLUDED.value, updated_at = NOW(), updated_by = EXCLUDED.updated_by`,
           [String(value), req.user.userId, key]
         );
       }
@@ -1123,11 +1126,76 @@ async function deleteChapter(req, res, next) {
   }
 }
 
+// ============================================================
+// NOTIFICATIONS
+// ============================================================
+
+async function getNotifications(req, res, next) {
+  try {
+    const { userId } = req.user;
+    // We only fetch notifications intended for this author (or user)
+    // Here we query where author_id = userId OR user_id = userId (if they receive system notifications)
+    const result = await db.query(
+      `SELECT id, type, title, message, link, is_read, created_at 
+       FROM notifications 
+       WHERE author_id = $1 OR user_id = $1
+       ORDER BY created_at DESC 
+       LIMIT 50`,
+      [userId]
+    );
+
+    res.json({ success: true, data: result.rows });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function markNotificationRead(req, res, next) {
+  try {
+    const { userId } = req.user;
+    const { id } = req.params;
+
+    const result = await db.query(
+      `UPDATE notifications 
+       SET is_read = true 
+       WHERE id = $1 AND (author_id = $2 OR user_id = $2)
+       RETURNING id`,
+      [id, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: 'Thông báo không tồn tại hoặc không có quyền.' });
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function markAllNotificationsRead(req, res, next) {
+  try {
+    const { userId } = req.user;
+
+    await db.query(
+      `UPDATE notifications 
+       SET is_read = true 
+       WHERE (author_id = $1 OR user_id = $1) AND is_read = false`,
+      [userId]
+    );
+
+    res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
 module.exports = {
   getDashboardStats, getStories, deleteStory,
   getUsers, toggleBanUser, toggleCommentPermission,
   getCategories, createCategory, deleteCategory,
   getComments, updateCommentStatus, deleteComment,
   getSettings, updateSettings, getMyProfile, updateMyProfile,
-  createStory, updateStory, getStoryChapters, createChapter, updateChapter, deleteChapter, getChapter
+  createStory, updateStory, getStoryChapters, createChapter, updateChapter, deleteChapter, getChapter,
+  getNotifications, markNotificationRead, markAllNotificationsRead
 };

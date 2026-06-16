@@ -40,6 +40,21 @@ router.get("/categories", async (req, res, next) => {
     next(err);
   }
 });
+
+// GET /api/settings (Public - cho Frontend/Metadata)
+router.get("/settings", async (req, res, next) => {
+  try {
+    const db = require("../config/db");
+    // Chỉ trả về public settings để bảo mật, hoặc toàn bộ nếu site_settings không chứa nhạy cảm
+    const result = await db.query('SELECT key, value, description FROM site_settings ORDER BY key ASC');
+    res.json({
+      success: true,
+      data: result.rows
+    });
+  } catch (err) {
+    next(err);
+  }
+});
 // router.use("/users", usersRoutes);
 // router.use("/chapters", chaptersRoutes);
 
