@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import "./globals.css";
 import GlobalReportButton from "./components/GlobalReportButton";
 
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata(): Promise<Metadata> {
   let siteName = "Trạm Chữ Novel";
   let description = "Nền tảng đọc truyện tiểu thuyết online miễn phí.";
