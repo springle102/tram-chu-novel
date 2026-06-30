@@ -1,4 +1,5 @@
 import type { StoryCardProps } from "@/app/types";
+import Link from "next/link";
 
 // ===========================
 // SVG Icons
@@ -68,6 +69,7 @@ function CoverPlaceholder() {
 // ===========================
 
 export default function StoryCard({
+  slug,
   coverImageUrl,
   title,
   author,
@@ -76,7 +78,10 @@ export default function StoryCard({
   categories,
 }: StoryCardProps) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-lg bg-card-bg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
+    <Link 
+      href={`/stories/${slug}`}
+      className="group flex flex-col overflow-hidden rounded-lg bg-card-bg shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md cursor-pointer text-inherit no-underline"
+    >
       {/* ── Cover Image (2:3 ratio) ── */}
       <div className="relative aspect-[2/3] w-full overflow-hidden">
         {coverImageUrl ? (
@@ -139,6 +144,6 @@ export default function StoryCard({
           </span>
         </div>
       </div>
-    </article>
+    </Link>
   );
 }

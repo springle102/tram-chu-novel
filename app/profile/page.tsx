@@ -21,13 +21,14 @@ export default function ProfilePage() {
   const router = useRouter();
 
   // ── States ──
+  const [mounted, setMounted] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   
-  const [displayName, setDisplayName] = useState("Độc Giả 01");
+  const [displayName, setDisplayName] = useState("");
   const [avatarUrl, setAvatarUrl] = useState("https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80");
-  const [username, setUsername] = useState("user_reader_01");
-  const [email, setEmail] = useState("user_reader_01@gmail.com");
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
 
   // Temp states for Edit Modal popup
   const [tempDisplayName, setTempDisplayName] = useState("");
@@ -44,12 +45,24 @@ export default function ProfilePage() {
   const [bookshelfStories, setBookshelfStories] = useState<any[]>([]);
   const [isLoadingBookshelf, setIsLoadingBookshelf] = useState(true);
 
+  // ── Reports State ──
+  const [myReports, setMyReports] = useState<any[]>([]);
+  const [isLoadingReports, setIsLoadingReports] = useState(false);
+  const [activeTab, setActiveTab] = useState<"bookshelf" | "reports">("bookshelf");
+
   // ── Fetch Stories from Database to Populate Bookshelf ──
   async function fetchBookshelfData() {
     try {
       setIsLoadingBookshelf(true);
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-      const res = await fetch(`${apiBaseUrl}/api/stories?limit=50`);
+      const res = await fetch(`${apiBaseUrl}/api/stories/bookmarked?limit=50`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
@@ -74,8 +87,43 @@ export default function ProfilePage() {
     }
   }
 
+  // ── Fetch Reports from Database ──
+  async function fetchMyReports() {
+    try {
+      setIsLoadingReports(true);
+      const token = localStorage.getItem("token");
+      if (!token) return;
+
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const res = await fetch(`${apiBaseUrl}/api/reports/my-reports`, {
+        headers: {
+          "Authorization": `Bearer ${token}`
+        }
+      });
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+      if (data.success && data.data) {
+        setMyReports(data.data);
+      }
+    } catch (err) {
+      console.error("Lỗi khi tải lịch sử báo lỗi:", err);
+    } finally {
+      setIsLoadingReports(false);
+    }
+  }
+
+  // ── Trigger Fetch on Tab Change ──
+  useEffect(() => {
+    if (activeTab === "reports") {
+      fetchMyReports();
+    }
+  }, [activeTab]);
+
   // ── Load User Info & Database Bookshelf on Mount ──
   useEffect(() => {
+    setMounted(true);
     const token = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
     if (token && storedUser) {
@@ -85,28 +133,17 @@ export default function ProfilePage() {
         setIsLoggedIn(true);
         
         // Load info from db/storage format
-        setDisplayName(parsed.displayName || parsed.fullName || "Độc Giả 01");
+        setDisplayName(parsed.displayName || parsed.fullName || "");
         setAvatarUrl(parsed.avatarUrl || "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80");
-        setUsername(parsed.username || (parsed.email ? parsed.email.split("@")[0] : "user_reader_01"));
-        setEmail(parsed.email || "user_reader_01@gmail.com");
+        setUsername(parsed.username || (parsed.email ? parsed.email.split("@")[0] : ""));
+        setEmail(parsed.email || "");
       } catch (err) {
         console.error("Failed to parse user details:", err);
       }
     } else {
-      // Simulate demo user if not logged in
-      setIsLoggedIn(true);
-      const demoUser = {
-        id: "demo-id",
-        displayName: "Độc Giả 01",
-        avatarUrl: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=150&h=150&fit=crop&q=80",
-        username: "user_reader_01",
-        email: "user_reader_01@gmail.com"
-      };
-      setCurrentUser(demoUser as any);
-      setDisplayName(demoUser.displayName);
-      setAvatarUrl(demoUser.avatarUrl);
-      setUsername(demoUser.username);
-      setEmail(demoUser.email);
+      // Redirect to login if not logged in
+      router.push("/auth");
+      return;
     }
 
     fetchBookshelfData();
@@ -127,8 +164,8 @@ export default function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Kích thước ảnh đại diện không được vượt quá 2MB.");
+    if (file.size > 3 * 1024 * 1024) {
+      alert("Kích thước ảnh đại diện không được vượt quá 3MB.");
       return;
     }
 
@@ -271,6 +308,17 @@ export default function ProfilePage() {
     }
   }
 
+  if (!mounted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#0d081b]">
+        <div className="text-center space-y-3">
+          <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-xs text-purple-300 font-semibold uppercase tracking-wider">Đang tải hồ sơ cá nhân...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* ── Injected Styles for Background ── */}
@@ -315,6 +363,8 @@ export default function ProfilePage() {
           user={currentUser}
           onLogin={handleLogin}
           onLogout={handleLogout}
+          onSearch={(query) => router.push(`/?search=${encodeURIComponent(query)}`)}
+          onCategoryChange={(cat) => router.push(`/?category=${encodeURIComponent(cat)}`)}
         />
 
         {/* ── Background ── */}
@@ -329,13 +379,13 @@ export default function ProfilePage() {
           
           {/* ── Title Heading ── */}
           <div className="mb-6 text-center">
-            <h1 className="text-3xl font-extrabold tracking-wider text-white uppercase drop-shadow-[0_0_12px_rgba(192,132,252,0.4)]">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-wider text-white uppercase drop-shadow-[0_0_12px_rgba(192,132,252,0.4)]">
               Hồ Sơ Độc Giả
             </h1>
           </div>
 
           {/* ── Main Card Container ── */}
-          <div className="rounded-3xl border border-purple-500/20 bg-white/95 p-6 shadow-xl shadow-purple-950/20 backdrop-blur-md">
+          <div className="rounded-3xl border border-purple-500/20 bg-white/95 p-5 sm:p-6 shadow-xl shadow-purple-950/20 backdrop-blur-md">
             
             {/* ── Alert Message ── */}
             {message && (
@@ -352,7 +402,7 @@ export default function ProfilePage() {
             )}
 
             {/* ── Top Section (Info & Stats) ── */}
-            <div className="flex flex-col gap-6 md:flex-row md:items-center">
+            <div className="flex flex-col gap-5 sm:gap-6 md:flex-row md:items-center">
               
               {/* Avatar Column */}
               <div className="flex flex-col items-center gap-3 shrink-0">
@@ -360,7 +410,7 @@ export default function ProfilePage() {
                   {/* Decorative glowing ring */}
                   <div className="absolute inset-0 -m-1.5 rounded-full bg-gradient-to-tr from-purple-50 via-pink-400 to-purple-500 animate-spin" style={{ animationDuration: "10s" }} />
                   {/* Avatar wrapper */}
-                  <div className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-purple-50 shadow-md">
+                  <div className="relative h-24 w-24 sm:h-28 sm:w-28 overflow-hidden rounded-full border-4 border-white bg-purple-50 shadow-md">
                     <img 
                       src={avatarUrl} 
                       alt="Avatar độc giả" 
@@ -371,38 +421,38 @@ export default function ProfilePage() {
               </div>
 
               {/* Info Column */}
-              <div className="flex-1 space-y-4">
+              <div className="flex-1 space-y-3 sm:space-y-4">
                 {/* Name field */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base font-bold text-purple-950 sm:w-24 shrink-0">Tên:</span>
-                  <span className="text-base font-semibold text-purple-950/80 px-1">{displayName}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                  <span className="text-sm sm:text-base font-bold text-purple-950 sm:w-24 shrink-0">Tên:</span>
+                  <span className="text-sm sm:text-base font-semibold text-purple-950/80 px-1">{displayName}</span>
                 </div>
 
                 {/* Username field */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base font-bold text-purple-950 sm:w-24 shrink-0">Username:</span>
-                  <span className="text-base font-semibold text-purple-950/80 px-1">@{username}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                  <span className="text-sm sm:text-base font-bold text-purple-950 sm:w-24 shrink-0">Username:</span>
+                  <span className="text-sm sm:text-base font-semibold text-purple-950/80 px-1 break-all">@{username}</span>
                 </div>
 
                 {/* Email field */}
-                <div className="flex items-center gap-1.5">
-                  <span className="text-base font-bold text-purple-950 sm:w-24 shrink-0">Email:</span>
-                  <span className="text-base font-semibold text-purple-950/80 px-1">{email}</span>
+                <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-1.5">
+                  <span className="text-sm sm:text-base font-bold text-purple-950 sm:w-24 shrink-0">Email:</span>
+                  <span className="text-sm sm:text-base font-semibold text-purple-950/80 px-1 break-all">{email}</span>
                 </div>
 
                 {/* Stats Row (Computed from Real DB Stories) */}
-                <div className="grid grid-cols-3 gap-2 py-2 border-t border-b border-purple-100">
+                <div className="grid grid-cols-3 gap-1 py-2 border-t border-b border-purple-100">
                   <div className="text-center">
-                    <span className="block text-xl font-extrabold text-purple-950">{totalStoriesRead}</span>
-                    <span className="text-xs font-bold text-purple-950/60 uppercase">Truyện Đã Đọc</span>
+                    <span className="block text-lg sm:text-xl font-extrabold text-purple-950">{totalStoriesRead}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-purple-950/60 uppercase">Truyện Đã Đọc</span>
                   </div>
                   <div className="text-center border-l border-r border-purple-100">
-                    <span className="block text-xl font-extrabold text-purple-950">{totalStoriesFollowed}</span>
-                    <span className="text-xs font-bold text-purple-950/60 uppercase">Đang Theo Dõi</span>
+                    <span className="block text-lg sm:text-xl font-extrabold text-purple-950">{totalStoriesFollowed}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-purple-950/60 uppercase">Đang Theo Dõi</span>
                   </div>
                   <div className="text-center">
-                    <span className="block text-xl font-extrabold text-purple-950">{totalChaptersRead}</span>
-                    <span className="text-xs font-bold text-purple-950/60 uppercase">Chương Đã Đọc</span>
+                    <span className="block text-lg sm:text-xl font-extrabold text-purple-950">{totalChaptersRead}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-purple-950/60 uppercase">Chương Đã Đọc</span>
                   </div>
                 </div>
 
@@ -411,7 +461,7 @@ export default function ProfilePage() {
                   <button
                     type="button"
                     onClick={handleOpenEditModal}
-                    className="rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-6 py-2 text-sm font-bold text-white shadow-md shadow-purple-500/20 transition-all hover:translate-y-[-1px] hover:shadow-lg hover:shadow-purple-500/35 active:translate-y-[1px]"
+                    className="w-full sm:w-auto rounded-full bg-gradient-to-r from-purple-700 to-fuchsia-600 px-5 sm:px-6 py-2 text-xs sm:text-sm font-bold text-white shadow-md shadow-purple-500/20 transition-all hover:translate-y-[-1px] hover:shadow-lg hover:shadow-purple-500/35 active:translate-y-[1px] text-center"
                   >
                     Chỉnh Sửa Thông Tin
                   </button>
@@ -419,97 +469,175 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* ── Personal Bookshelf Section ── */}
+            {/* ── Tabs Navigation ── */}
             <div className="mt-8 border-t-2 border-purple-100 pt-6">
-              
-              {/* Shelf Header */}
-              <div className="mb-6 flex items-center gap-3">
-                <div className="h-7 w-1.5 rounded-full bg-gradient-to-b from-purple-600 to-fuchsia-500" />
-                <h2 className="text-xl font-extrabold text-purple-950 uppercase tracking-wide">
+              <div className="flex border-b border-purple-150 mb-6 gap-6">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("bookshelf")}
+                  className={`pb-3 text-sm sm:text-base font-extrabold uppercase tracking-wide border-b-2 transition-all duration-200 ${
+                    activeTab === "bookshelf"
+                      ? "border-purple-600 text-purple-950"
+                      : "border-transparent text-purple-950/40 hover:text-purple-950/70"
+                  }`}
+                >
                   Tủ Sách Cá Nhân
-                </h2>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("reports")}
+                  className={`pb-3 text-sm sm:text-base font-extrabold uppercase tracking-wide border-b-2 transition-all duration-200 ${
+                    activeTab === "reports"
+                      ? "border-purple-600 text-purple-950"
+                      : "border-transparent text-purple-950/40 hover:text-purple-950/70"
+                  }`}
+                >
+                  Báo Lỗi Của Tôi
+                </button>
               </div>
 
-              {/* Shelf Books Grid */}
-              {isLoadingBookshelf ? (
-                <div className="flex justify-center items-center py-20">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
-                  <span className="ml-3 text-sm text-purple-950/60 font-semibold">Đang tải tủ sách từ Database...</span>
-                </div>
-              ) : bookshelfStories.length === 0 ? (
-                <div className="text-center py-20 bg-purple-50/30 rounded-2xl border-2 border-dashed border-purple-200">
-                  <p className="text-sm text-purple-950/60 font-bold">Tủ sách trống</p>
-                  <p className="text-xs text-purple-500/80 mt-1">Vui lòng thêm truyện mới vào database để hiển thị.</p>
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
-                  
-
-
-                  {/* Books from Database */}
-                  {bookshelfStories.map((book, idx) => {
-                    // Calculate real progress based on the database chapter count
-                    const progressChapters = book.status === 'completed' 
-                      ? book.chapterCount 
-                      : Math.max(1, Math.round(book.chapterCount * (0.3 + (idx * 0.15) % 0.6)));
-                    const percent = Math.round((progressChapters / book.chapterCount) * 100);
-                    
-                    return (
-                      <div 
-                        key={book.id} 
-                        className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:translate-y-[-3px] hover:shadow-md"
-                      >
-                        {/* Image cover */}
-                        <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-100">
-                          {book.coverImageUrl ? (
-                            <img 
-                              src={book.coverImageUrl} 
-                              alt={book.title} 
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="flex h-full w-full items-center justify-center bg-purple-100 text-purple-400 font-bold text-[10px] p-2 text-center">
-                              {book.title}
-                            </div>
-                          )}
-                          {/* Progress ratio overlay */}
-                          <div className="absolute bottom-2 right-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
-                            {progressChapters}/{book.chapterCount} ch
-                          </div>
-                        </div>
-
-                        {/* Detail section */}
-                        <div className="p-2 flex-1 flex flex-col justify-between">
-                          <div>
-                            <h4 className="text-xs font-bold text-purple-950 leading-tight line-clamp-2" title={book.title}>
-                              {book.title}
-                            </h4>
-                            <span className="text-[10px] text-purple-500/80 font-semibold mt-0.5 block">
-                              {book.status === 'completed' ? 'Đã hoàn thành' : 'Đang tiến hành'}
-                            </span>
-                          </div>
-                          
-                          {/* Progress bar container */}
-                          <div className="mt-2 space-y-1">
-                            <div className="h-1.5 w-full rounded-full bg-purple-100 overflow-hidden">
-                              <div 
-                                className="h-full bg-gradient-to-r from-purple-600 to-fuchsia-500 rounded-full" 
-                                style={{ width: `${percent}%` }}
+              {/* ── Active Tab Content ── */}
+              {activeTab === "bookshelf" ? (
+                isLoadingBookshelf ? (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
+                    <span className="ml-3 text-sm text-purple-950/60 font-semibold">Đang tải tủ sách từ Database...</span>
+                  </div>
+                ) : bookshelfStories.length === 0 ? (
+                  <div className="text-center py-20 bg-purple-50/30 rounded-2xl border-2 border-dashed border-purple-200">
+                    <p className="text-sm text-purple-950/60 font-bold">Tủ sách trống</p>
+                    <p className="text-xs text-purple-500/80 mt-1">Vui lòng thêm truyện mới vào database để hiển thị.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">
+                    {/* Books from Database */}
+                    {bookshelfStories.map((book, idx) => {
+                      const progressChapters = book.status === 'completed' 
+                        ? book.chapterCount 
+                        : Math.max(1, Math.round(book.chapterCount * (0.3 + (idx * 0.15) % 0.6)));
+                      const percent = Math.round((progressChapters / book.chapterCount) * 100);
+                      
+                      return (
+                        <div 
+                          key={book.id} 
+                          className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-all duration-300 hover:translate-y-[-3px] hover:shadow-md"
+                        >
+                          <div className="relative aspect-[2/3] w-full overflow-hidden bg-gray-100">
+                            {book.coverImageUrl ? (
+                              <img 
+                                src={book.coverImageUrl} 
+                                alt={book.title} 
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                               />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center bg-purple-100 text-purple-400 font-bold text-[10px] p-2 text-center">
+                                {book.title}
+                              </div>
+                            )}
+                            <div className="absolute bottom-2 right-2 rounded-md bg-black/60 px-1.5 py-0.5 text-[9px] font-bold text-white backdrop-blur-sm">
+                              {progressChapters}/{book.chapterCount} ch
                             </div>
-                            <span className="text-[9px] font-bold text-purple-950/60 block text-right">
-                              {percent}%
-                            </span>
+                          </div>
+
+                          <div className="p-2 flex-1 flex flex-col justify-between">
+                            <div>
+                              <h4 className="text-xs font-bold text-purple-950 leading-tight line-clamp-2" title={book.title}>
+                                {book.title}
+                              </h4>
+                              <span className="text-[10px] text-purple-500/80 font-semibold mt-0.5 block">
+                                {book.status === 'completed' ? 'Đã hoàn thành' : 'Đang tiến hành'}
+                              </span>
+                            </div>
+                            
+                            <div className="mt-2 space-y-1">
+                              <div className="h-1.5 w-full rounded-full bg-purple-100 overflow-hidden">
+                                <div 
+                                  className="h-full bg-gradient-to-r from-purple-600 to-fuchsia-500 rounded-full" 
+                                  style={{ width: `${percent}%` }}
+                                />
+                              </div>
+                              <span className="text-[9px] font-bold text-purple-950/60 block text-right">
+                                {percent}%
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-                </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : (
+                /* ── Reports History Tab ── */
+                isLoadingReports ? (
+                  <div className="flex justify-center items-center py-20">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-purple-600 border-t-transparent" />
+                    <span className="ml-3 text-sm text-purple-950/60 font-semibold">Đang tải lịch sử báo lỗi...</span>
+                  </div>
+                ) : myReports.length === 0 ? (
+                  <div className="text-center py-20 bg-purple-50/30 rounded-2xl border-2 border-dashed border-purple-200">
+                    <p className="text-sm text-purple-950/60 font-bold">Không có báo lỗi nào</p>
+                    <p className="text-xs text-purple-500/80 mt-1">Mọi báo lỗi bạn gửi qua nút "Báo lỗi" nổi sẽ xuất hiện ở đây.</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto rounded-2xl border border-purple-100 bg-white shadow-sm p-4">
+                    <table className="w-full text-left border-collapse text-purple-950">
+                      <thead>
+                        <tr className="border-b border-purple-100 text-xs text-purple-950/60 font-bold uppercase">
+                          <th className="pb-3 w-[160px]">Ngày gửi</th>
+                          <th className="pb-3">Nội dung báo lỗi</th>
+                          <th className="pb-3 w-[160px]">Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody className="text-xs sm:text-sm divide-y divide-purple-50/50">
+                        {myReports.map((rp) => (
+                          <tr key={rp.id} className="hover:bg-purple-50/10">
+                            <td className="py-4 text-purple-950/60 font-semibold">
+                              {new Date(rp.created_at).toLocaleDateString('vi-VN', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </td>
+                            <td className="py-4 pr-4 font-semibold leading-relaxed whitespace-pre-wrap max-w-[400px]">
+                              {rp.reason}
+                            </td>
+                            <td className="py-4">
+                              {rp.status === 'pending' && (
+                                <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                                  Chờ duyệt
+                                </span>
+                              )}
+                              {rp.status === 'accepted' && (
+                                <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                  Đã chấp nhận
+                                </span>
+                              )}
+                              {rp.status === 'processing' && (
+                                <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                  Đang xử lý
+                                </span>
+                              )}
+                              {rp.status === 'resolved' && (
+                                <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                  Xử lý hoàn tất
+                                </span>
+                              )}
+                              {rp.status === 'rejected' && (
+                                <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] sm:text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                                  Đã từ chối
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )
               )}
-
             </div>
-
           </div>
         </main>
       </div>

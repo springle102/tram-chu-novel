@@ -319,7 +319,7 @@ export default function AdminSettingsPage() {
             {/* Min Chapter Length */}
             <div className="space-y-1.5">
               <label className="block text-xs font-bold text-gray-650 uppercase tracking-wide">
-                Độ dài tối thiểu của một chương (Ký tự)
+                Độ dài tối thiểu của một chương (Từ/Chữ)
               </label>
               <input
                 type="number"

@@ -152,7 +152,7 @@ export default function AdminStoriesPage() {
       </div>
 
       {/* Filter controls */}
-      <div className="bg-white border border-gray-150 rounded-2xl p-6 shadow-sm">
+      <div className="bg-white rounded-2xl p-6 shadow-sm -mt-4">
         <form onSubmit={handleSearchSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Search bar */}
           <div className="relative">
@@ -163,7 +163,7 @@ export default function AdminStoriesPage() {
             </span>
             <input
               type="text"
-              placeholder="Tìm theo tiêu đề truyện..."
+              placeholder="Nhập tiêu đề truyện cần tìm..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition-all"
@@ -235,36 +235,37 @@ export default function AdminStoriesPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50/50 text-xs text-gray-400 font-bold uppercase">
-                    <th className="py-4 px-6 w-[80px]">Bìa</th>
-                    <th className="py-4 px-4">Tên truyện</th>
-                    {isAdmin && <th className="py-4 px-4">Tác giả</th>}
-                    <th className="py-4 px-4">Thể loại</th>
-                    <th className="py-4 px-4 text-center">Trạng thái</th>
-                    <th className="py-4 px-4 text-right">Lượt xem</th>
-                    <th className="py-4 px-4 text-center">Đánh giá</th>
-                    <th className="py-4 px-4 text-center">Chương</th>
-                    <th className="py-4 px-4">Cập nhật</th>
-                    <th className="py-4 px-6 text-center">Thao tác</th>
+                    <th className="py-3 px-4 w-[110px] text-center whitespace-nowrap">Bìa</th>
+                    <th className="py-3 px-4 text-center">Tên truyện</th>
+                    {isAdmin && <th className="py-3 px-4 text-center">Tác giả</th>}
+                    <th className="py-3 px-4 text-center">Thể loại</th>
+                    <th className="py-3 px-4 w-[150px] text-center whitespace-nowrap">Trạng thái</th>
+                    <th className="py-3 px-4 text-center">Lượt xem</th>
+                    <th className="py-3 px-4 text-center">Đánh giá</th>
+                    <th className="py-3 px-4 text-center">Chương</th>
+                    <th className="py-3 px-4 text-center">Cập nhật</th>
+                    <th className="py-3 px-4 text-center">Thao tác</th>
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-gray-100">
                   {stories.map((story) => (
                     <tr key={story.id} className="hover:bg-gray-50/50">
-                      <td className="py-4 px-6">
+                      <td className="py-2.5 px-4">
                         <img
                           src={story.cover_image || 'https://placehold.co/400x600/7c3aed/white?text=Novel'}
                           alt={story.title}
-                          className="w-10 h-14 object-cover rounded-md border border-gray-200 shadow-sm"
+                          className="object-cover rounded-md border border-gray-200 shadow-sm shrink-0"
+                          style={{ width: '64px', height: '96px', minWidth: '64px' }}
                         />
                       </td>
-                      <td className="py-4 px-4">
+                      <td className="py-2.5 px-4">
                         <div className="font-bold text-gray-800 hover:text-purple-700 transition-colors cursor-pointer max-w-[200px] truncate">
                           {story.title}
                         </div>
                         <p className="text-xs text-gray-400 font-mono mt-0.5 truncate max-w-[200px]">{story.slug}</p>
                       </td>
-                      {isAdmin && <td className="py-4 px-4 text-gray-600 font-medium">{story.author_name}</td>}
-                      <td className="py-4 px-4">
+                      {isAdmin && <td className="py-2.5 px-4 text-gray-600 font-medium">{story.author_name}</td>}
+                      <td className="py-2.5 px-4">
                         <div className="flex flex-wrap gap-1 max-w-[200px]">
                           {story.categories && story.categories.length > 0 ? (
                             story.categories.map((cat) => (
@@ -280,8 +281,8 @@ export default function AdminStoriesPage() {
                           )}
                         </div>
                       </td>
-                      <td className="py-4 px-4 text-center">
-                        <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full border ${
+                      <td className="py-2.5 px-4 text-center">
+                        <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full border whitespace-nowrap ${
                           story.status === 'completed'
                             ? 'bg-blue-50 text-blue-600 border-blue-200'
                             : 'bg-emerald-50 text-emerald-600 border-emerald-200'
@@ -289,15 +290,15 @@ export default function AdminStoriesPage() {
                           {story.status === 'completed' ? 'Hoàn thành' : 'Đang ra'}
                         </span>
                       </td>
-                      <td className="py-4 px-4 text-right text-gray-700 font-medium">
+                      <td className="py-2.5 px-4 text-right text-gray-700 font-medium">
                         {story.view_count.toLocaleString('vi-VN')}
                       </td>
-                      <td className="py-4 px-4 text-center text-amber-500 font-bold">
+                      <td className="py-2.5 px-4 text-center text-amber-500 font-bold">
                         ★ {Number(story.rating).toFixed(1)}
                       </td>
-                      <td className="py-4 px-4 text-center font-bold text-gray-700">{story.chapter_count}</td>
-                      <td className="py-4 px-4 text-gray-500 font-medium">{formatDate(story.updated_at)}</td>
-                      <td className="py-4 px-6 text-center whitespace-nowrap">
+                      <td className="py-2.5 px-4 text-center font-bold text-gray-700">{story.chapter_count}</td>
+                      <td className="py-2.5 px-4 text-gray-500 font-medium">{formatDate(story.updated_at)}</td>
+                      <td className="py-2.5 px-4 text-center whitespace-nowrap">
                         <Link
                           href={`/admin/stories/${story.id}`}
                           className="text-purple-600 hover:text-purple-800 p-2 hover:bg-purple-50 rounded-lg transition-all duration-200 inline-block mr-1"

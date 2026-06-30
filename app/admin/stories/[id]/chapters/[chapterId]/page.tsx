@@ -23,6 +23,10 @@ export default function EditChapterPage() {
   const [content, setContent] = useState('');
   const [publishMode, setPublishMode] = useState<'publish' | 'draft' | 'schedule'>('publish');
   const [scheduledAt, setScheduledAt] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordQuestion, setPasswordQuestion] = useState('');
+  const [passwordHint, setPasswordHint] = useState('');
+  const [minLength, setMinLength] = useState(500);
 
   useEffect(() => {
     const user = getAdminUser();
@@ -67,6 +71,9 @@ export default function EditChapterPage() {
         setTitle(c.title || '');
         setContent(c.content || '');
         setChapterNumber(c.chapter_number);
+        setPassword(c.password || '');
+        setPasswordQuestion(c.password_question || '');
+        setPasswordHint(c.password_hint || '');
 
         // Determine publish mode
         if (!c.is_published) {
@@ -79,6 +86,19 @@ export default function EditChapterPage() {
         }
       } else {
         throw new Error(chapRes.error || 'Không tải được chi tiết chương.');
+      }
+
+      // Fetch min chapter length setting from public API
+      const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+      const settingsRes = await fetch(`${apiBaseUrl}/api/settings`);
+      if (settingsRes.ok) {
+        const settingsData = await settingsRes.json();
+        if (settingsData.success && settingsData.data) {
+          const minLenSetting = settingsData.data.find((item: any) => item.key === 'min_chapter_length');
+          if (minLenSetting) {
+            setMinLength(parseInt(minLenSetting.value, 10) || 500);
+          }
+        }
       }
     } catch (err: any) {
       setMessage({ type: 'error', text: err.message || 'Lỗi tải dữ liệu.' });
@@ -106,10 +126,15 @@ export default function EditChapterPage() {
       return;
     }
 
+    const isPublished = publishMode !== 'draft';
+    if (isPublished && wordCount < minLength) {
+      setMessage({ type: 'error', text: `Độ dài chương không đủ. Chương truyện phải có ít nhất ${minLength} từ để xuất bản (hiện tại có ${wordCount} từ).` });
+      return;
+    }
+
     setSubmitting(true);
     setMessage(null);
 
-    const isPublished = publishMode !== 'draft';
     const finalScheduledAt = publishMode === 'schedule' ? scheduledAt : null;
 
     try {
@@ -120,6 +145,9 @@ export default function EditChapterPage() {
           content,
           isPublished,
           scheduledAt: finalScheduledAt,
+          password: password.trim() || null,
+          passwordQuestion: passwordQuestion.trim() || null,
+          passwordHint: passwordHint.trim() || null,
         }),
       });
 
@@ -209,7 +237,7 @@ export default function EditChapterPage() {
                 <input
                   type="text"
                   required
-                  placeholder="Ví dụ: Chương 1: Tiết tử khởi đầu"
+                  placeholder="Nhập tiêu đề chương, chỉ nhập tiêu đề không nhập số chương (ví dụ: chương 1, chương 2,...)"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all"
@@ -234,6 +262,54 @@ export default function EditChapterPage() {
                   rows={20}
                   className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl p-4 text-sm text-gray-800 outline-none transition-all font-serif leading-relaxed"
                 />
+              </div>
+
+              {/* Password Protection (Optional) */}
+              <div className="border-t border-gray-100 pt-4 space-y-4">
+                <div className="flex items-center gap-2 pb-1">
+                  <svg className="w-4 h-4 text-purple-600 shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                  <h3 className="text-xs font-bold text-gray-800 uppercase tracking-wider">Mật khẩu chương (Tùy chọn)</h3>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 mb-1.5">
+                      Mật khẩu chương
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nhập mật khẩu chương..."
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-3 py-2 text-sm text-gray-800 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 mb-1.5">
+                      Câu hỏi gợi ý mật khẩu
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nhập câu hỏi gợi ý mật khẩu..."
+                      value={passwordQuestion}
+                      onChange={(e) => setPasswordQuestion(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-3 py-2 text-sm text-gray-800 outline-none transition-all"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-500 mb-1.5">
+                      Gợi ý (Hint)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Nhập gợi ý mật khẩu..."
+                      value={passwordHint}
+                      onChange={(e) => setPasswordHint(e.target.value)}
+                      className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-3 py-2 text-sm text-gray-800 outline-none transition-all"
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>

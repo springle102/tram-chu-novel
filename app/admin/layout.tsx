@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { getAdminUser, logoutAdmin } from './utils';
+import { getAdminUser, logoutAdmin, fetchAdmin } from './utils';
 import NotificationDropdown from './components/NotificationDropdown';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -11,6 +11,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [user, setUser] = useState<{ id: string; fullName: string; email: string; role: string; avatarUrl?: string } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Tự động đóng mobile sidebar khi thay đổi trang
+  useEffect(() => {
+    setIsMobileSidebarOpen(false);
+  }, [pathname]);
 
   const isLoginPage = pathname === '/admin/login';
 
@@ -21,7 +27,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       return;
     }
 
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem('admin_token');
       const adminUser = getAdminUser();
 
@@ -30,6 +36,30 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       } else {
         setUser(adminUser);
         setLoading(false);
+
+        // Fetch fresh profile in background to sync localStorage
+        try {
+          const res = await fetchAdmin('/api/admin/profile');
+          if (res.success && res.data) {
+            const profile = res.data;
+            if (
+              adminUser.fullName !== profile.username ||
+              adminUser.email !== profile.email ||
+              adminUser.avatarUrl !== profile.avatar_url
+            ) {
+              const updatedUser = {
+                ...adminUser,
+                fullName: profile.username,
+                email: profile.email,
+                avatarUrl: profile.avatar_url || undefined,
+              };
+              localStorage.setItem('admin_user', JSON.stringify(updatedUser));
+              setUser(updatedUser);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to sync profile in background:', err);
+        }
       }
     };
 
@@ -141,6 +171,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ),
         },
         {
+          name: 'Quản lý Báo lỗi',
+          href: '/admin/reports',
+          icon: (
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          ),
+        },
+        {
           name: 'Cài đặt hệ thống',
           href: '/admin/settings',
           icon: (
@@ -194,19 +233,31 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const currentNav = navItems.find((item) => item.href === pathname) || navItems[0];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex font-sans">
+    <div className="min-h-screen bg-gray-100 flex font-sans relative">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 z-20 md:hidden animate-in fade-in duration-200" 
+          onClick={() => setIsMobileSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0f0c1b] text-gray-300 flex flex-col fixed inset-y-0 left-0 border-r border-purple-900/10 shadow-xl z-20">
+      <aside 
+        className={`fixed inset-y-0 left-0 w-64 bg-[#0f0c1b] text-gray-300 flex flex-col border-r border-purple-900/10 shadow-xl z-30 transition-transform duration-300 md:translate-x-0 ${
+          isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         {/* Brand Logo */}
         <div className="p-6 border-b border-purple-900/30 flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+          <div className="w-10 h-10 bg-gradient-to-tr from-purple-600 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20 shrink-0">
             <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5" />
             </svg>
           </div>
           <div>
             <h2 className="font-bold text-white leading-tight">Trạm Chữ Novel</h2>
-            <span className="text-[10px] bg-purple-600/30 text-purple-300 font-semibold px-2 py-0.5 rounded-full border border-purple-500/20 uppercase tracking-widest">
+            <span className="text-[10px] bg-purple-600/30 text-purple-300 font-semibold px-2 py-0.5 rounded-full border border-purple-500/20 uppercase tracking-widest mt-1 inline-block">
               {isAdmin ? 'Admin' : 'Tác giả'}
             </span>
           </div>
@@ -259,25 +310,39 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Panel Content Area */}
-      <div className="flex-1 pl-64 flex flex-col min-h-screen min-w-0">
+      <div className="flex-1 md:pl-64 pl-0 flex flex-col min-h-screen min-w-0 transition-all duration-300">
         {/* Header */}
-        <header className="h-16 bg-white border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="font-semibold text-purple-600">Admin Panel</span>
-            <span className="text-gray-400">/</span>
-            <span className="font-medium text-gray-800">{currentNav.name}</span>
+        <header className="h-16 bg-white border-b border-gray-200 px-4 md:px-8 flex items-center justify-between sticky top-0 z-10 shadow-sm">
+          {/* Breadcrumb & Menu Toggle */}
+          <div className="flex items-center">
+            {/* Hamburger menu button */}
+            <button
+              type="button"
+              onClick={() => setIsMobileSidebarOpen(true)}
+              className="md:hidden p-2 text-gray-500 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors focus:outline-none mr-2"
+              title="Mở menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+
+            <div className="flex items-center gap-1.5 text-xs sm:text-sm text-gray-500 font-medium">
+              <span className="font-semibold text-purple-600 hidden xs:inline">Admin Panel</span>
+              <span className="text-gray-400 hidden xs:inline">/</span>
+              <span className="font-semibold text-gray-800 truncate max-w-[150px] sm:max-w-none">{currentNav.name}</span>
+            </div>
           </div>
 
           {/* Right Header Controls */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 md:gap-4">
             <a
               href="/"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center text-xs font-semibold text-purple-600 hover:text-purple-700 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg border border-purple-200 transition-all duration-200"
             >
-              Xem trang đọc truyện
+              Xem trang chủ
               <svg className="w-3.5 h-3.5 ml-1.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
@@ -298,7 +363,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Content Box */}
-        <main className="flex-1 p-8 bg-gray-50 min-w-0 overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-8 bg-gray-50 min-w-0 overflow-x-hidden">
           {children}
         </main>
       </div>

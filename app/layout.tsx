@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import GlobalReportButton from "./components/GlobalReportButton";
 
 export async function generateMetadata(): Promise<Metadata> {
   let siteName = "Trạm Chữ Novel";
@@ -52,6 +53,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col font-sans antialiased">
         {children}
+        <GlobalReportButton />
       </body>
     </html>
   );

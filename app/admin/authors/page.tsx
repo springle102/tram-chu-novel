@@ -164,14 +164,14 @@ export default function AdminAuthorsPage() {
       </div>
 
       {/* Search Bar Block */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-150 shadow-sm flex items-center justify-between">
+      <div className="bg-white p-4 rounded-2xl border border-gray-150 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm font-semibold text-gray-700">
           Tổng tác giả: <span className="text-purple-600 font-extrabold">{totalAuthors}</span>
         </div>
         <form onSubmit={handleSearchSubmit} className="flex gap-2 max-w-sm w-full">
           <input
             type="text"
-            placeholder="Tìm tác giả theo username, email..."
+            placeholder="Nhập tên, username hoặc email của tác giả..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl py-2 px-4 text-xs outline-none transition-all"
@@ -426,7 +426,7 @@ export default function AdminAuthorsPage() {
                   Lý do khóa tài khoản
                 </label>
                 <textarea
-                  placeholder="Ví dụ: Đăng truyện có nội dung phản cảm, vi phạm điều khoản sở hữu trí tuệ..."
+                  placeholder="Nhập lý do khóa tài khoản..."
                   value={banReason}
                   onChange={(e) => setBanReason(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl p-3 text-xs outline-none transition-all h-20 resize-none"

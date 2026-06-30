@@ -27,6 +27,7 @@ interface AdminDashboardData {
   recentUsers: Array<{
     id: string;
     username: string;
+    display_name?: string;
     email: string;
     role: string;
     avatar_url?: string;
@@ -308,7 +309,6 @@ export default function AdminDashboardPage() {
                   <thead>
                     <tr className="border-b border-gray-100 text-xs text-gray-400 font-bold uppercase">
                       <th className="pb-3">Hội viên</th>
-                      <th className="pb-3">Email</th>
                       <th className="pb-3">Vai trò</th>
                       <th className="pb-3">Ngày đăng ký</th>
                     </tr>
@@ -318,13 +318,12 @@ export default function AdminDashboardPage() {
                       <tr key={u.id} className="hover:bg-gray-50/50">
                         <td className="py-3 flex items-center gap-3">
                           <img
-                            src={u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=8b5cf6&color=fff`}
-                            alt={u.username}
+                            src={u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.display_name || u.username)}&background=8b5cf6&color=fff`}
+                            alt={u.display_name || u.username}
                             className="w-8 h-8 rounded-full border border-gray-100 object-cover"
                           />
-                          <span className="font-semibold text-gray-800">{u.username}</span>
+                          <span className="font-semibold text-gray-800">{u.display_name || u.username}</span>
                         </td>
-                        <td className="py-3 text-gray-600">{u.email}</td>
                         <td className="py-3">
                           <span className={`inline-flex px-2.5 py-0.5 rounded-full text-xs font-bold ${
                             u.role === 'author'
@@ -471,21 +470,31 @@ export default function AdminDashboardPage() {
                       </p>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-400 font-bold uppercase">Link Donation</p>
+                      <p className="text-xs text-gray-400 font-bold uppercase">Mã QR / Link Donation</p>
                       {authorData.profile.donation_link ? (
-                        <a
-                          href={authorData.profile.donation_link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline inline-flex items-center mt-1 font-medium"
-                        >
-                          {authorData.profile.donation_link}
-                          <svg className="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                          </svg>
-                        </a>
+                        authorData.profile.donation_link.startsWith('data:image/') || authorData.profile.donation_link.includes(';base64,') ? (
+                          <div className="mt-2 bg-white border border-gray-200 p-2.5 rounded-xl shadow-sm inline-block">
+                            <img
+                              src={authorData.profile.donation_link}
+                              alt="Mã QR Donation"
+                              className="w-36 h-36 object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <a
+                            href={authorData.profile.donation_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-blue-600 hover:underline inline-flex items-center mt-1 font-medium"
+                          >
+                            {authorData.profile.donation_link}
+                            <svg className="w-3.5 h-3.5 ml-1" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </a>
+                        )
                       ) : (
-                        <p className="text-sm text-gray-400 mt-1">Chưa cập nhật link donation.</p>
+                        <p className="text-sm text-gray-400 mt-1">Chưa cập nhật mã QR hoặc liên kết donation.</p>
                       )}
                     </div>
                   </div>

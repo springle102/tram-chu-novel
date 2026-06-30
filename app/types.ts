@@ -17,6 +17,7 @@ export interface User {
   id: string;
   displayName: string;
   avatarUrl: string | null;
+  role?: string;
 }
 
 // ===========================
@@ -29,9 +30,12 @@ export interface HeaderProps {
   onLogin?: () => void;
   onLogout?: () => void;
   onSearch?: (query: string) => void;
+  onCategoryChange?: (category: string) => void;
+  selectedCategory?: string;
 }
 
 export interface StoryCardProps {
+  slug: string;
   coverImageUrl: string | null;
   title: string;
   author: string;

@@ -53,14 +53,30 @@ export default function AdminProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      setMessage({ type: 'error', text: 'Kích thước ảnh đại diện không được vượt quá 2MB.' });
+    if (file.size > 3 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Kích thước ảnh đại diện không được vượt quá 3MB.' });
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = () => {
       setAvatarUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDonationQrChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setMessage({ type: 'error', text: 'Kích thước ảnh QR Code không được vượt quá 2MB.' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setDonationLink(reader.result as string);
     };
     reader.readAsDataURL(file);
   };
@@ -241,7 +257,7 @@ export default function AdminProfilePage() {
                     required
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder={isAuthor ? 'Bút danh viết truyện' : 'Tên hiển thị'}
+                    placeholder={isAuthor ? 'Nhập bút danh viết truyện...' : 'Nhập tên hiển thị...'}
                     className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all"
                   />
                 </div>
@@ -256,7 +272,7 @@ export default function AdminProfilePage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="email@example.com"
+                    placeholder="Nhập email của bạn..."
                     className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all"
                   />
                 </div>
@@ -265,7 +281,7 @@ export default function AdminProfilePage() {
               {/* Avatar Upload */}
               <div>
                 <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                  Tải ảnh đại diện mới từ máy tính (Tối đa 2MB)
+                  Tải ảnh đại diện mới từ máy tính (Tối đa 3MB)
                 </label>
                 <div className="flex items-center gap-4">
                   <input
@@ -295,18 +311,46 @@ export default function AdminProfilePage() {
               {/* Author Specific Fields */}
               {isAuthor && (
                 <>
-                  {/* Donation Link */}
+                  {/* Donation QR Code */}
                   <div>
                     <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wider mb-2">
-                      Liên kết donate ủng hộ (Donation Link)
+                      Ảnh Mã QR Donate Ủng Hộ (Tối đa 2MB)
                     </label>
-                    <input
-                      type="url"
-                      value={donationLink}
-                      onChange={(e) => setDonationLink(e.target.value)}
-                      placeholder="https://paypal.me/bút-danh"
-                      className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all"
-                    />
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleDonationQrChange}
+                          className="block w-full text-sm text-gray-500
+                            file:mr-4 file:py-2 file:px-4
+                            file:rounded-xl file:border-0
+                            file:text-sm file:font-semibold
+                            file:bg-purple-50 file:text-purple-700
+                            hover:file:bg-purple-100
+                            cursor-pointer focus:outline-none"
+                        />
+                        {donationLink && (
+                          <button
+                            type="button"
+                            onClick={() => setDonationLink('')}
+                            className="text-xs text-red-500 hover:text-red-600 font-semibold shrink-0"
+                          >
+                            Xoá mã QR
+                          </button>
+                        )}
+                      </div>
+                      
+                      {donationLink && (donationLink.startsWith('data:image/') || donationLink.startsWith('http')) && (
+                        <div className="bg-white border border-gray-200 p-2 rounded-xl shadow-sm inline-block">
+                          <img
+                            src={donationLink}
+                            alt="Mã QR Donation Preview"
+                            className="w-32 h-32 object-contain"
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Bio */}
@@ -317,7 +361,7 @@ export default function AdminProfilePage() {
                     <textarea
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      placeholder="Giới thiệu ngắn gọn về bản thân và phong cách sáng tác..."
+                      placeholder="Nhập giới thiệu ngắn về bản thân..."
                       rows={4}
                       className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all resize-none"
                     />
@@ -339,7 +383,7 @@ export default function AdminProfilePage() {
                       type="password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="Nhập mật khẩu mới..."
                       className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all"
                     />
                   </div>
@@ -353,7 +397,7 @@ export default function AdminProfilePage() {
                       type="password"
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      placeholder="••••••••"
+                      placeholder="Nhập lại mật khẩu mới..."
                       className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all"
                     />
                   </div>

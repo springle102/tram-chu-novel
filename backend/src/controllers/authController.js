@@ -19,12 +19,17 @@ async function register(req, res, next) {
   });
 
   try {
-    const { fullName, email, password, role } = req.body;
+    const { fullName, email, password, role, username } = req.body;
 
     // 1. Validation
     const errors = [];
     if (!fullName || typeof fullName !== "string" || fullName.trim().length < 2) {
       errors.push("Họ tên là bắt buộc và phải có ít nhất 2 ký tự.");
+    }
+    if (role === 'reader') {
+      if (!username || typeof username !== "string" || !/^[a-zA-Z0-9_]{3,30}$/.test(username.trim())) {
+        errors.push("Username chỉ chứa chữ cái, số, dấu gạch dưới và dài từ 3-30 ký tự.");
+      }
     }
     if (!email || typeof email !== "string") {
       errors.push("Email là bắt buộc.");
@@ -64,10 +69,47 @@ async function register(req, res, next) {
       });
     }
 
+    // Kiểm tra trùng lặp username độc giả
+    if (role === 'reader') {
+      const normalizedUsername = username.trim().toLowerCase();
+      const existingUsername = await db.query(
+        `SELECT id FROM users WHERE LOWER(username) = $1`,
+        [normalizedUsername]
+      );
+      if (existingUsername.rows.length > 0) {
+        return res.status(409).json({
+          success: false,
+          error: "Username này đã tồn tại. Vui lòng chọn username khác."
+        });
+      }
+    }
+
     // 3. Lưu mật khẩu trực tiếp dạng plain text
     console.log("[AUTH-REGISTER] Bỏ qua băm password, lưu dạng plain text...");
 
-    const userId = uuidv4();
+    let userId;
+    if (role === 'author') {
+      const dbRes = await db.query("SELECT id FROM authors WHERE id LIKE 'AU%'");
+      let nextNum = 1;
+      if (dbRes.rows.length > 0) {
+        const numbers = dbRes.rows.map(r => parseInt(r.id.replace('AU', ''), 10)).filter(n => !isNaN(n));
+        if (numbers.length > 0) {
+          nextNum = Math.max(...numbers) + 1;
+        }
+      }
+      userId = `AU${String(nextNum).padStart(2, '0')}`;
+    } else {
+      const dbRes = await db.query("SELECT id FROM users WHERE id LIKE 'RD%'");
+      let nextNum = 1;
+      if (dbRes.rows.length > 0) {
+        const numbers = dbRes.rows.map(r => parseInt(r.id.replace('RD', ''), 10)).filter(n => !isNaN(n));
+        if (numbers.length > 0) {
+          nextNum = Math.max(...numbers) + 1;
+        }
+      }
+      userId = `RD${nextNum}`;
+    }
+
     let result;
 
     if (role === 'author') {
@@ -85,13 +127,14 @@ async function register(req, res, next) {
       ]);
     } else {
       const insertQuery = `
-        INSERT INTO users (id, username, email, password, role)
-        VALUES ($1, $2, $3, $4, $5)
-        RETURNING id, username AS "fullName", email, role, created_at
+        INSERT INTO users (id, username, display_name, email, password, role)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, username, display_name AS "displayName", display_name AS "fullName", email, role, created_at
       `;
       console.log(`[AUTH-REGISTER] Đang lưu Reader mới vào Database (ID: ${userId})`);
       result = await db.query(insertQuery, [
         userId,
+        username.trim().toLowerCase(),
         fullName.trim(),
         normalizedEmail,
         password,
@@ -138,14 +181,14 @@ async function login(req, res, next) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    console.log(`[AUTH-LOGIN] Đang tìm kiếm User: ${normalizedEmail}`);
+    console.log(`[AUTH-LOGIN] Đang tìm kiếm User (email hoặc username): ${normalizedEmail}`);
 
     let user = null;
 
     // Search in both tables to find the correct user first
     const userRes = await db.query(
-      `SELECT id, username, email, password, role, avatar_url, created_at, is_banned
-       FROM users WHERE email = $1`,
+      `SELECT id, username, display_name, email, password, role, avatar_url, created_at, is_banned
+       FROM users WHERE email = $1 OR LOWER(username) = $1`,
       [normalizedEmail]
     );
     if (userRes.rows.length > 0) {
@@ -153,7 +196,7 @@ async function login(req, res, next) {
     } else {
       const authorRes = await db.query(
         `SELECT id, pen_name as username, email, password, 'author'::text as role, avatar_url, created_at, is_banned
-         FROM authors WHERE email = $1`,
+         FROM authors WHERE email = $1 OR LOWER(pen_name) = $1`,
         [normalizedEmail]
       );
       if (authorRes.rows.length > 0) {
@@ -165,7 +208,7 @@ async function login(req, res, next) {
       console.warn(`[AUTH-LOGIN] Không tìm thấy user: ${normalizedEmail}`);
       return res.status(401).json({
         success: false,
-        error: "Email hoặc mật khẩu không chính xác.",
+        error: "Email/Username hoặc mật khẩu không chính xác.",
       });
     }
 
@@ -199,19 +242,16 @@ async function login(req, res, next) {
         success: false,
         error: "Tài khoản của bạn đã bị khóa."
       });
-    }
-
-    // 4. Kiểm tra phân quyền (Role Validation)
-    if (user.role !== role) {
+    }    // 4. Kiểm tra phân quyền (Role Validation)
+    if (role === 'author' && user.role !== 'author') {
       console.warn(`[AUTH-LOGIN] Role mismatch: User has role '${user.role}' but requested '${role}'`);
       return res.status(400).json({
         success: false,
-        error: `Tài khoản của bạn có vai trò là ${user.role === "author" ? "Tác giả" : user.role === "admin" ? "Admin" : "Độc giả"}. Vui lòng đăng nhập đúng cổng.`,
+        error: "Tài khoản của bạn không có vai trò Tác giả. Vui lòng đăng nhập đúng cổng.",
         roleMismatch: true,
         correctRole: user.role
       });
     }
-
     // Cập nhật last_login_at
     if (user.role === 'author') {
       await db.query("UPDATE authors SET last_login_at = NOW() WHERE id = $1", [user.id]);
@@ -236,7 +276,9 @@ async function login(req, res, next) {
         token,
         user: {
           id: user.id,
-          fullName: user.username,
+          fullName: user.role === 'author' ? user.username : (user.display_name || user.username),
+          displayName: user.role === 'author' ? user.username : (user.display_name || user.username),
+          username: user.role === 'author' ? user.username : user.username,
           email: user.email,
           role: user.role,
           avatarUrl: user.avatar_url,
@@ -254,31 +296,51 @@ async function login(req, res, next) {
 async function updateProfile(req, res, next) {
   console.log("\n[AUTH-UPDATE-PROFILE] >>> Nhận yêu cầu cập nhật thông tin cá nhân");
   try {
-    const { userId, username, avatarUrl } = req.body;
+    const { userId, displayName, username, email, password, avatarUrl } = req.body;
     if (!userId) {
       console.warn("[AUTH-UPDATE-PROFILE] Thiếu userId");
       return res.status(400).json({ success: false, error: "UserId là bắt buộc." });
     }
 
-    let updateQuery = `
-      UPDATE users
-      SET username = $2, avatar_url = $3
-      WHERE id = $1
-      RETURNING id, username AS "fullName", email, role, avatar_url AS "avatarUrl", created_at
-    `;
+    let result;
+    const isAuthor = userId.startsWith('AU');
 
-    console.log(`[AUTH-UPDATE-PROFILE] Đang cập nhật user ID: ${userId} với username: ${username}`);
-    let result = await db.query(updateQuery, [userId, username, avatarUrl]);
-
-    if (result.rows.length === 0) {
-      console.log(`[AUTH-UPDATE-PROFILE] Thử cập nhật bảng authors cho ID: ${userId}`);
-      updateQuery = `
-        UPDATE authors
-        SET pen_name = $2, avatar_url = $3
-        WHERE id = $1
-        RETURNING id, pen_name AS "fullName", 'author'::text as role, email, avatar_url AS "avatarUrl", created_at
-      `;
-      result = await db.query(updateQuery, [userId, username, avatarUrl]);
+    if (isAuthor) {
+      if (password) {
+        result = await db.query(
+          `UPDATE authors
+           SET pen_name = $2, email = $3, avatar_url = $4, password = $5
+           WHERE id = $1
+           RETURNING id, pen_name AS "fullName", pen_name AS "displayName", 'author'::text as role, email, avatar_url AS "avatarUrl", created_at`,
+          [userId, displayName || username, email, avatarUrl, password]
+        );
+      } else {
+        result = await db.query(
+          `UPDATE authors
+           SET pen_name = $2, email = $3, avatar_url = $4
+           WHERE id = $1
+           RETURNING id, pen_name AS "fullName", pen_name AS "displayName", 'author'::text as role, email, avatar_url AS "avatarUrl", created_at`,
+          [userId, displayName || username, email, avatarUrl]
+        );
+      }
+    } else {
+      if (password) {
+        result = await db.query(
+          `UPDATE users
+           SET username = $2, display_name = $3, email = $4, avatar_url = $5, password = $6
+           WHERE id = $1
+           RETURNING id, username, display_name AS "displayName", display_name AS "fullName", email, role, avatar_url AS "avatarUrl", created_at`,
+          [userId, username, displayName, email, avatarUrl, password]
+        );
+      } else {
+        result = await db.query(
+          `UPDATE users
+           SET username = $2, display_name = $3, email = $4, avatar_url = $5
+           WHERE id = $1
+           RETURNING id, username, display_name AS "displayName", display_name AS "fullName", email, role, avatar_url AS "avatarUrl", created_at`,
+          [userId, username, displayName, email, avatarUrl]
+        );
+      }
     }
 
     if (result.rows.length === 0) {

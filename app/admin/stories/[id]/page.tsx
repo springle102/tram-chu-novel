@@ -20,6 +20,9 @@ interface Chapter {
   scheduled_at: string | null;
   created_at: string;
   updated_at: string;
+  password?: string | null;
+  password_question?: string | null;
+  password_hint?: string | null;
 }
 
 interface StoryDetails {
@@ -71,6 +74,58 @@ export default function StoryDetailPage() {
   const [deletingChapterId, setDeletingChapterId] = useState<string | null>(null);
   const [deletingChapterName, setDeletingChapterName] = useState('');
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Preview chapter states
+  const [previewChapter, setPreviewChapter] = useState<Chapter | null>(null);
+  const [previewContent, setPreviewContent] = useState<string>('');
+  const [previewLoading, setPreviewLoading] = useState<boolean>(false);
+  const [enteredPassword, setEnteredPassword] = useState<string>('');
+  const [passwordError, setPasswordError] = useState<string>('');
+  const [isUnlocked, setIsUnlocked] = useState<boolean>(false);
+  const [showHint, setShowHint] = useState<boolean>(false);
+
+  const handlePreviewChapter = async (chap: Chapter) => {
+    setPreviewChapter(chap);
+    setEnteredPassword('');
+    setPasswordError('');
+    setShowHint(false);
+    
+    if (chap.password) {
+      setIsUnlocked(false);
+    } else {
+      setIsUnlocked(true);
+      await fetchChapterContent(chap.id);
+    }
+  };
+
+  const fetchChapterContent = async (chapterId: string) => {
+    setPreviewLoading(true);
+    try {
+      const res = await fetchAdmin(`/api/admin/stories/${storyId}/chapters/${chapterId}`);
+      if (res.success && res.data) {
+        setPreviewContent(res.data.content);
+      } else {
+        throw new Error(res.error || 'Không tải được nội dung chương.');
+      }
+    } catch (err: any) {
+      alert(err.message || 'Lỗi tải nội dung chương.');
+      setPreviewChapter(null);
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleUnlockSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!previewChapter) return;
+    
+    if (enteredPassword.trim() === previewChapter.password) {
+      setIsUnlocked(true);
+      await fetchChapterContent(previewChapter.id);
+    } else {
+      setPasswordError('Mật khẩu không chính xác. Vui lòng thử lại.');
+    }
+  };
 
   useEffect(() => {
     const user = getAdminUser();
@@ -447,7 +502,19 @@ export default function StoryDetailPage() {
                       <tr key={chap.id} className="hover:bg-gray-50/50">
                         <td className="py-3.5 px-4 text-center font-semibold text-gray-500">#{chap.chapter_number}</td>
                         <td className="py-3.5 px-4">
-                          <div className="font-bold text-gray-700">{chap.title}</div>
+                          <div 
+                            onClick={() => handlePreviewChapter(chap)}
+                            className="font-bold text-gray-700 hover:text-purple-600 hover:underline cursor-pointer transition-all flex items-center gap-1.5"
+                          >
+                            {chap.title}
+                            {chap.password && (
+                              <span className="inline-flex p-0.5 bg-purple-50 rounded text-purple-600 hover:bg-purple-100" title="Chương được đặt mật khẩu">
+                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-center">{statusBadge}</td>
                         <td className="py-3.5 px-4 text-right text-gray-500 font-medium">{chap.word_count.toLocaleString()}</td>
@@ -520,6 +587,150 @@ export default function StoryDetailPage() {
                 {deleteLoading ? 'Đang xóa...' : 'Đồng ý xóa'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Chapter Reading Preview Modal ── */}
+      {previewChapter && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white border border-gray-200 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] font-sans">
+            
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <div>
+                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">
+                  Chương {previewChapter.chapter_number}
+                </span>
+                <h3 className="text-lg font-bold text-gray-800 mt-1">
+                  {previewChapter.title}
+                </h3>
+              </div>
+              <button 
+                onClick={() => setPreviewChapter(null)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 hover:bg-gray-100 rounded-lg transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {!isUnlocked ? (
+                /* Locked Password View */
+                <form onSubmit={handleUnlockSubmit} className="max-w-md mx-auto py-8 space-y-6 text-center">
+                  <div className="w-16 h-16 bg-purple-50 border border-purple-100 rounded-2xl flex items-center justify-center mx-auto shadow-sm">
+                    <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                    </svg>
+                  </div>
+                  
+                  <div>
+                    <h4 className="text-md font-extrabold text-gray-800">Chương này đã được khóa mật khẩu</h4>
+                    <p className="text-xs text-gray-400 mt-1">Vui lòng nhập mật khẩu chính xác để đọc nội dung chương truyện.</p>
+                  </div>
+
+                  {/* Password Question */}
+                  {previewChapter.password_question && (
+                    <div className="bg-purple-50/50 border border-purple-100/50 rounded-xl p-4 text-left">
+                      <span className="block text-[10px] font-bold text-purple-600 uppercase tracking-wider mb-1">
+                        Câu hỏi bảo vệ:
+                      </span>
+                      <p className="text-sm font-semibold text-gray-700">
+                        {previewChapter.password_question}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Password Input */}
+                  <div className="space-y-2 text-left">
+                    <input
+                      type="text"
+                      required
+                      placeholder="Nhập mật khẩu chương..."
+                      value={enteredPassword}
+                      onChange={(e) => {
+                        setEnteredPassword(e.target.value);
+                        setPasswordError('');
+                      }}
+                      className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all text-center font-bold tracking-wider"
+                    />
+                    {passwordError && (
+                      <p className="text-xs text-red-500 font-semibold text-center">{passwordError}</p>
+                    )}
+                  </div>
+
+                  {/* Password Hint */}
+                  {previewChapter.password_hint && (
+                    <div className="space-y-2">
+                      <button
+                        type="button"
+                        onClick={() => setShowHint(!showHint)}
+                        className="text-xs text-purple-600 hover:text-purple-700 font-bold transition-colors"
+                      >
+                        {showHint ? 'Ẩn gợi ý mật khẩu' : 'Xem gợi ý mật khẩu (Hint)'}
+                      </button>
+                      {showHint && (
+                        <div className="bg-amber-50 border border-amber-100 text-amber-800 text-xs rounded-xl p-3 text-center animate-in fade-in slide-in-from-top-1 duration-150">
+                          <strong>Gợi ý:</strong> {previewChapter.password_hint}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Submit buttons */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setPreviewChapter(null)}
+                      className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-sm rounded-xl py-2.5 transition-all"
+                    >
+                      Hủy bỏ
+                    </button>
+                    <button
+                      type="submit"
+                      className="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold text-sm rounded-xl py-2.5 shadow-sm transition-all"
+                    >
+                      Mở khóa chương
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Reading Content View */
+                <div className="space-y-4">
+                  {previewLoading ? (
+                    <div className="py-12 flex flex-col justify-center items-center gap-3">
+                      <svg className="animate-spin h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      <span className="text-gray-400 font-semibold text-xs">Đang mở khóa và tải nội dung...</span>
+                    </div>
+                  ) : (
+                    <div className="prose prose-purple max-w-none">
+                      <div className="whitespace-pre-line text-gray-700 font-serif leading-relaxed text-[15px] space-y-4">
+                        {previewContent}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            {isUnlocked && !previewLoading && (
+              <div className="px-6 py-4 border-t border-gray-100 flex justify-end bg-gray-50/50">
+                <button
+                  onClick={() => setPreviewChapter(null)}
+                  className="bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl px-5 py-2.5 transition-all"
+                >
+                  Đóng
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       )}

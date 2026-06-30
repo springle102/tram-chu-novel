@@ -160,7 +160,7 @@ export default function AdminCategoriesPage() {
             <input
               type="text"
               required
-              placeholder="Ví dụ: Huyền Huyễn"
+              placeholder="Nhập tên thể loại..."
               value={name}
               onChange={handleNameChange}
               className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl py-2 px-3.5 text-xs outline-none transition-all"
@@ -175,7 +175,7 @@ export default function AdminCategoriesPage() {
             <input
               type="text"
               required
-              placeholder="huyen-huyen"
+              placeholder="Nhập đường dẫn thể loại (slug)..."
               value={slug}
               onChange={(e) => setSlug(toSlug(e.target.value))}
               className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl py-2 px-3.5 text-xs outline-none transition-all font-mono"

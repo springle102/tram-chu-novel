@@ -6,6 +6,7 @@ import { fetchAdmin, getAdminUser, formatDate } from '../utils';
 interface User {
   id: string;
   username: string;
+  display_name?: string;
   email: string;
   role: string;
   avatar_url?: string;
@@ -123,14 +124,14 @@ export default function AdminReadersPage() {
       </div>
 
       {/* Search Bar Block */}
-      <div className="bg-white p-4 rounded-2xl border border-gray-150 shadow-sm flex items-center justify-between">
+      <div className="bg-white p-4 rounded-2xl border border-gray-150 shadow-sm flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="text-sm font-semibold text-gray-700">
           Tổng độc giả: <span className="text-purple-600 font-extrabold">{totalReaders}</span>
         </div>
         <form onSubmit={handleSearchSubmit} className="flex gap-2 max-w-sm w-full">
           <input
             type="text"
-            placeholder="Tìm độc giả theo username, email..."
+            placeholder="Nhập tên, username hoặc email của độc giả..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="flex-1 bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl py-2 px-4 text-xs outline-none transition-all"
@@ -163,6 +164,7 @@ export default function AdminReadersPage() {
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50/50 text-xs text-gray-400 font-bold uppercase">
                     <th className="py-4 px-6">Độc giả</th>
+                    <th className="py-4 px-4">Username</th>
                     <th className="py-4 px-4">Email</th>
                     <th className="py-4 px-4">Ngày tham gia</th>
                     <th className="py-4 px-4">Đăng nhập gần nhất</th>
@@ -175,15 +177,16 @@ export default function AdminReadersPage() {
                     <tr key={u.id} className="hover:bg-gray-50/50">
                       <td className="py-4 px-6 flex items-center gap-3">
                         <img
-                          src={u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.username)}&background=7c3aed&color=fff`}
-                          alt={u.username}
+                          src={u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.display_name || u.username)}&background=7c3aed&color=fff`}
+                          alt={u.display_name || u.username}
                           className="w-9 h-9 rounded-xl border border-gray-200 object-cover"
                         />
                         <div>
-                          <p className="font-bold text-gray-800">{u.username}</p>
+                          <p className="font-bold text-gray-800">{u.display_name || u.username}</p>
                           <span className="text-[10px] text-gray-400 font-mono select-all">{u.id}</span>
                         </div>
                       </td>
+                      <td className="py-4 px-4 text-gray-650 font-mono">@{u.username}</td>
                       <td className="py-4 px-4 text-gray-650">{u.email}</td>
                       <td className="py-4 px-4 text-gray-500">{formatDate(u.created_at)}</td>
                       <td className="py-4 px-4 text-gray-500">
@@ -218,7 +221,7 @@ export default function AdminReadersPage() {
                   ))}
                   {readers.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-gray-400 font-semibold">
+                      <td colSpan={7} className="py-12 text-center text-gray-400 font-semibold">
                         Không tìm thấy độc giả thỏa mãn.
                       </td>
                     </tr>
@@ -271,7 +274,7 @@ export default function AdminReadersPage() {
                   Lý do khóa tài khoản
                 </label>
                 <textarea
-                  placeholder="Ví dụ: Spam bình luận liên tục, có hành vi quấy rối độc giả khác..."
+                  placeholder="Nhập lý do khóa tài khoản..."
                   value={banReason}
                   onChange={(e) => setBanReason(e.target.value)}
                   className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-gray-800 rounded-xl p-3 text-xs outline-none transition-all h-20 resize-none"

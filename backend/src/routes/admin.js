@@ -10,6 +10,12 @@ const { Router } = require('express');
 const { verifyToken, requireAdmin, verifyAdmin, requireAuthorOrAdmin } = require('../middleware/adminAuth');
 const adminController = require('../controllers/adminController');
 const adminAuthController = require('../controllers/adminAuthController');
+const uploadController = require('../controllers/uploadController');
+const multer = require('multer');
+const os = require('os');
+
+// Cấu hình multer để lưu file tạm vào /tmp (thích hợp cho Koyeb read-only filesystem)
+const upload = multer({ dest: os.tmpdir() });
 
 const router = Router();
 
@@ -20,6 +26,10 @@ router.post('/login', adminAuthController.login);
 // All other admin routes require authentication
 router.use(verifyToken);
 router.use(requireAuthorOrAdmin);
+
+// ── Image Upload (admin + author) ──
+// POST /api/admin/upload
+router.post('/upload', upload.single('image'), uploadController.uploadImage);
 
 // ── Dashboard (admin + author) ──
 router.get('/dashboard', adminController.getDashboardStats);
@@ -45,6 +55,10 @@ router.delete('/stories/:id/chapters/:chapterId', adminController.deleteChapter)
 router.get('/users', requireAdmin, adminController.getUsers);
 router.patch('/users/:id/ban', requireAdmin, adminController.toggleBanUser);
 router.patch('/users/:id/comment-permission', requireAdmin, adminController.toggleCommentPermission);
+
+// ── Reports (admin only) ──
+router.get('/reports', requireAdmin, adminController.getReports);
+router.patch('/reports/:id/status', requireAdmin, adminController.updateReportStatus);
 
 // ── Categories (admin only for create/delete) ──
 router.get('/categories', adminController.getCategories);

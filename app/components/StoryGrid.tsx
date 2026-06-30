@@ -76,6 +76,7 @@ export default function StoryGrid({ stories }: StoryGridProps) {
           {stories.map((story) => (
             <StoryCard
               key={story.id}
+              slug={story.slug || ""}
               coverImageUrl={story.coverImageUrl}
               title={story.title}
               author={story.author}

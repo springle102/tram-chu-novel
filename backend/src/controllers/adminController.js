@@ -6,6 +6,17 @@
 // ============================================================
 
 const db = require('../config/db');
+const fs = require('fs');
+
+function logDebug(message) {
+  const logFile = "c:/Users/anhxu/OneDrive/Desktop/tram-chu-novel/backend_debug.log";
+  const timestamp = new Date().toISOString();
+  try {
+    fs.appendFileSync(logFile, `[${timestamp}] ${message}\n`);
+  } catch (e) {
+    console.error("Failed to write to debug log:", e);
+  }
+}
 
 // ── DASHBOARD ──
 // GET /api/admin/dashboard
@@ -26,6 +37,12 @@ async function getDashboardStats(req, res, next) {
         db.query(`SELECT s.id, s.title, s.slug, s.status, s.view_count, s.rating, s.chapter_count, s.created_at, s.updated_at,
                   a.pen_name as author_name,
                   (
+                    SELECT string_agg(cat.name, ', ')
+                    FROM story_categories sc
+                    JOIN categories cat ON sc.category_id = cat.id
+                    WHERE sc.story_id = s.id
+                  ) as category_name,
+                  (
                     SELECT COALESCE(json_agg(json_build_object('id', cat.id, 'name', cat.name)), '[]'::json)
                     FROM story_categories sc
                     JOIN categories cat ON sc.category_id = cat.id
@@ -34,10 +51,10 @@ async function getDashboardStats(req, res, next) {
                   FROM stories s
                   JOIN authors a ON s.author_id = a.id
                   ORDER BY s.created_at DESC LIMIT 5`),
-        db.query(`SELECT id, username, email, role, avatar_url, created_at FROM (
-                    SELECT id, username, email, 'reader'::text as role, avatar_url, created_at FROM users
+        db.query(`SELECT id, username, display_name, email, role, avatar_url, created_at FROM (
+                    SELECT id, username, display_name, email, 'reader'::text as role, avatar_url, created_at FROM users
                     UNION ALL
-                    SELECT id, pen_name as username, email, 'author'::text as role, avatar_url, created_at FROM authors
+                    SELECT id, pen_name as username, pen_name as display_name, email, 'author'::text as role, avatar_url, created_at FROM authors
                   ) as combined ORDER BY created_at DESC LIMIT 5`),
         db.query(`SELECT c.name, COUNT(sc.story_id) as count FROM categories c LEFT JOIN story_categories sc ON sc.category_id = c.id GROUP BY c.id, c.name ORDER BY count DESC`),
         db.query('SELECT COUNT(*) FROM comments'),
@@ -60,6 +77,12 @@ async function getDashboardStats(req, res, next) {
       // Author sees only their data
       const [myStories, myViews, myProfile, myCommentsCount, myAvgRating] = await Promise.all([
         db.query(`SELECT s.id, s.title, s.slug, s.status, s.view_count, s.rating, s.chapter_count, s.created_at, s.updated_at,
+                  (
+                    SELECT string_agg(cat.name, ', ')
+                    FROM story_categories sc
+                    JOIN categories cat ON sc.category_id = cat.id
+                    WHERE sc.story_id = s.id
+                  ) as category_name,
                   (
                     SELECT COALESCE(json_agg(json_build_object('id', cat.id, 'name', cat.name)), '[]'::json)
                     FROM story_categories sc
@@ -141,6 +164,12 @@ async function getStories(req, res, next) {
              s.chapter_count, s.created_at, s.updated_at,
              a.pen_name as author_name, a.id as author_id,
              (
+               SELECT string_agg(cat.name, ', ')
+               FROM story_categories sc
+               JOIN categories cat ON sc.category_id = cat.id
+               WHERE sc.story_id = s.id
+             ) as category_name,
+             (
                SELECT COALESCE(json_agg(json_build_object('id', cat.id, 'name', cat.name)), '[]'::json)
                FROM story_categories sc
                JOIN categories cat ON sc.category_id = cat.id
@@ -209,7 +238,7 @@ async function getUsers(req, res, next) {
       let paramIndex = 1;
 
       if (search) {
-        whereConditions.push(`(username ILIKE $${paramIndex} OR email ILIKE $${paramIndex})`);
+        whereConditions.push(`(username ILIKE $${paramIndex} OR display_name ILIKE $${paramIndex} OR email ILIKE $${paramIndex})`);
         params.push(`%${search}%`);
         paramIndex++;
       }
@@ -220,7 +249,7 @@ async function getUsers(req, res, next) {
       total = parseInt(countResult.rows[0].count);
 
       const dataQuery = `
-        SELECT id, username, email, 'reader'::text as role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at
+        SELECT id, username, display_name, email, 'reader'::text as role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at
         FROM users ${whereClause}
         ORDER BY created_at DESC LIMIT $${paramIndex++} OFFSET $${paramIndex++}
       `;
@@ -255,7 +284,7 @@ async function getUsers(req, res, next) {
       // All roles (combined)
       const countQuery = `
         SELECT (
-          SELECT COUNT(*) FROM users ${search ? 'WHERE username ILIKE $1 OR email ILIKE $1' : ''}
+          SELECT COUNT(*) FROM users ${search ? 'WHERE username ILIKE $1 OR display_name ILIKE $1 OR email ILIKE $1' : ''}
         ) + (
           SELECT COUNT(*) FROM authors ${search ? 'WHERE pen_name ILIKE $1 OR email ILIKE $1' : ''}
         ) as count
@@ -265,13 +294,13 @@ async function getUsers(req, res, next) {
       total = parseInt(countResult.rows[0].count);
 
       const dataQuery = `
-        SELECT id, username, email, role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at
+        SELECT id, username, display_name, email, role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at
         FROM (
-          SELECT id, username, email, 'reader'::text as role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at FROM users
+          SELECT id, username, display_name, email, 'reader'::text as role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at FROM users
           UNION ALL
-          SELECT id, pen_name as username, email, 'author'::text as role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at FROM authors
+          SELECT id, pen_name as username, pen_name as display_name, email, 'author'::text as role, avatar_url, is_banned, banned_at, ban_reason, created_at, last_login_at FROM authors
         ) as combined
-        ${search ? 'WHERE combined.username ILIKE $3 OR combined.email ILIKE $3' : ''}
+        ${search ? 'WHERE combined.username ILIKE $3 OR combined.display_name ILIKE $3 OR combined.email ILIKE $3' : ''}
         ORDER BY created_at DESC LIMIT $1 OFFSET $2
       `;
       const dataParams = [limit, offset];
@@ -446,7 +475,7 @@ async function getComments(req, res, next) {
 
     const dataQuery = `
       SELECT cm.id, cm.content, cm.status, cm.created_at,
-             COALESCE(u.username, a.pen_name) as user_name,
+             COALESCE(u.display_name, u.username, a.pen_name) as user_name,
              COALESCE(u.avatar_url, a.avatar_url) as user_avatar,
              u.id as user_id,
              a.id as author_id,
@@ -788,12 +817,23 @@ async function createStory(req, res, next) {
     const client = await db.getClient();
     try {
       await client.query('BEGIN');
+      const dbRes = await client.query("SELECT id FROM stories WHERE id LIKE 'NOV%'");
+      let nextNum = 1;
+      if (dbRes.rows.length > 0) {
+        const numbers = dbRes.rows.map(r => parseInt(r.id.replace('NOV', ''), 10)).filter(n => !isNaN(n));
+        if (numbers.length > 0) {
+          nextNum = Math.max(...numbers) + 1;
+        }
+      }
+      const storyId = `NOV${String(nextNum).padStart(2, '0')}`;
+
       const insertStoryQuery = `
-        INSERT INTO stories (author_id, title, slug, cover_image, description, status, category_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        INSERT INTO stories (id, author_id, title, slug, cover_image, description, status, category_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id, title, slug, status, created_at
       `;
       const storyRes = await client.query(insertStoryQuery, [
+        storyId,
         userId,
         title.trim(),
         finalSlug,
@@ -802,12 +842,11 @@ async function createStory(req, res, next) {
         status || 'ongoing',
         (categoryIds && categoryIds.length > 0) ? categoryIds[0] : null
       ]);
-      const storyId = storyRes.rows[0].id;
 
       if (categoryIds && Array.isArray(categoryIds) && categoryIds.length > 0) {
         const insertCatsQuery = `
           INSERT INTO story_categories (story_id, category_id)
-          SELECT $1::uuid, UNNEST($2::uuid[])
+          SELECT $1::varchar, UNNEST($2::uuid[])
         `;
         await client.query(insertCatsQuery, [storyId, categoryIds]);
       }
@@ -880,7 +919,7 @@ async function updateStory(req, res, next) {
       if (categoryIds && Array.isArray(categoryIds) && categoryIds.length > 0) {
         const insertCatsQuery = `
           INSERT INTO story_categories (story_id, category_id)
-          SELECT $1::uuid, UNNEST($2::uuid[])
+          SELECT $1::varchar, UNNEST($2::uuid[])
         `;
         await client.query(insertCatsQuery, [id, categoryIds]);
       }
@@ -923,7 +962,7 @@ async function getStoryChapters(req, res, next) {
     }
 
     const result = await db.query(
-      `SELECT id, chapter_number, title, word_count, view_count, is_published, scheduled_at, created_at, updated_at
+      `SELECT id, chapter_number, title, word_count, view_count, is_published, scheduled_at, password, password_question, password_hint, created_at, updated_at
        FROM chapters
        WHERE story_id = $1
        ORDER BY chapter_number ASC`,
@@ -951,7 +990,7 @@ async function getChapter(req, res, next) {
     }
 
     const result = await db.query(
-      `SELECT id, story_id, chapter_number, title, content, is_published, scheduled_at
+      `SELECT id, story_id, chapter_number, title, content, is_published, scheduled_at, password, password_question, password_hint
        FROM chapters
        WHERE id = $1 AND story_id = $2`,
       [chapterId, id]
@@ -984,7 +1023,7 @@ async function createChapter(req, res, next) {
       return res.status(403).json({ success: false, error: 'Bạn không có quyền thêm chương cho truyện này.' });
     }
 
-    const { title, content, isPublished, scheduledAt } = req.body;
+    const { title, content, isPublished, scheduledAt, password, passwordQuestion, passwordHint } = req.body;
     if (!title || title.trim().length === 0) {
       return res.status(400).json({ success: false, error: 'Tiêu đề chương không được để trống.' });
     }
@@ -992,14 +1031,28 @@ async function createChapter(req, res, next) {
       return res.status(400).json({ success: false, error: 'Nội dung chương không được để trống.' });
     }
 
+    const isPublishedVal = isPublished !== false;
     const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+
+    // Validate min chapter length if publishing
+    if (isPublishedVal) {
+      const settingRes = await db.query("SELECT value FROM site_settings WHERE key = 'min_chapter_length'");
+      const minLength = settingRes.rows.length > 0 ? parseInt(settingRes.rows[0].value, 10) : 500;
+      if (wordCount < minLength) {
+        return res.status(400).json({
+          success: false,
+          error: `Độ dài chương không đủ. Chương truyện phải có ít nhất ${minLength} từ để xuất bản (hiện tại có ${wordCount} từ).`
+        });
+      }
+    }
+
     const numResult = await db.query('SELECT COALESCE(MAX(chapter_number), 0) + 1 AS next_num FROM chapters WHERE story_id = $1', [id]);
     const chapterNumber = numResult.rows[0].next_num;
 
     const query = `
-      INSERT INTO chapters (story_id, chapter_number, title, content, word_count, is_published, scheduled_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id, chapter_number, title, is_published, scheduled_at, created_at
+      INSERT INTO chapters (story_id, chapter_number, title, content, word_count, is_published, scheduled_at, password, password_question, password_hint)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+      RETURNING id, chapter_number, title, is_published, scheduled_at, password, password_question, password_hint, created_at
     `;
     const result = await db.query(query, [
       id,
@@ -1008,7 +1061,10 @@ async function createChapter(req, res, next) {
       content,
       wordCount,
       isPublished !== false,
-      scheduledAt ? new Date(scheduledAt) : null
+      scheduledAt ? new Date(scheduledAt) : null,
+      password && password.trim() ? password.trim() : null,
+      passwordQuestion && passwordQuestion.trim() ? passwordQuestion.trim() : null,
+      passwordHint && passwordHint.trim() ? passwordHint.trim() : null
     ]);
 
     await db.query(
@@ -1046,7 +1102,7 @@ async function updateChapter(req, res, next) {
       return res.status(404).json({ success: false, error: 'Chương không tồn tại trong truyện này.' });
     }
 
-    const { title, content, isPublished, scheduledAt } = req.body;
+    const { title, content, isPublished, scheduledAt, password, passwordQuestion, passwordHint } = req.body;
     if (!title || title.trim().length === 0) {
       return res.status(400).json({ success: false, error: 'Tiêu đề chương không được để trống.' });
     }
@@ -1054,13 +1110,27 @@ async function updateChapter(req, res, next) {
       return res.status(400).json({ success: false, error: 'Nội dung chương không được để trống.' });
     }
 
+    const isPublishedVal = isPublished !== false;
     const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+
+    // Validate min chapter length if publishing
+    if (isPublishedVal) {
+      const settingRes = await db.query("SELECT value FROM site_settings WHERE key = 'min_chapter_length'");
+      const minLength = settingRes.rows.length > 0 ? parseInt(settingRes.rows[0].value, 10) : 500;
+      if (wordCount < minLength) {
+        return res.status(400).json({
+          success: false,
+          error: `Độ dài chương không đủ. Chương truyện phải có ít nhất ${minLength} từ để xuất bản (hiện tại có ${wordCount} từ).`
+        });
+      }
+    }
 
     const query = `
       UPDATE chapters
-      SET title = $1, content = $2, word_count = $3, is_published = $4, scheduled_at = $5
-      WHERE id = $6 AND story_id = $7
-      RETURNING id, chapter_number, title, is_published, scheduled_at, updated_at
+      SET title = $1, content = $2, word_count = $3, is_published = $4, scheduled_at = $5,
+          password = $6, password_question = $7, password_hint = $8, updated_at = NOW()
+      WHERE id = $9 AND story_id = $10
+      RETURNING id, chapter_number, title, is_published, scheduled_at, password, password_question, password_hint, updated_at
     `;
     const result = await db.query(query, [
       title.trim(),
@@ -1068,6 +1138,9 @@ async function updateChapter(req, res, next) {
       wordCount,
       isPublished !== false,
       scheduledAt ? new Date(scheduledAt) : null,
+      password && password.trim() ? password.trim() : null,
+      passwordQuestion && passwordQuestion.trim() ? passwordQuestion.trim() : null,
+      passwordHint && passwordHint.trim() ? passwordHint.trim() : null,
       chapterId,
       id
     ]);
@@ -1134,36 +1207,65 @@ async function deleteChapter(req, res, next) {
 
 async function getNotifications(req, res, next) {
   try {
-    const { userId } = req.user;
-    // We only fetch notifications intended for this author (or user)
-    // Here we query where author_id = userId OR user_id = userId (if they receive system notifications)
-    const result = await db.query(
-      `SELECT id, type, title, message, link, is_read, created_at 
-       FROM notifications 
-       WHERE author_id = $1 OR user_id = $1
-       ORDER BY created_at DESC 
-       LIMIT 50`,
-      [userId]
-    );
+    const { userId, role } = req.user;
+    const isAdmin = role === 'admin';
 
+    logDebug(`[GET_NOTIF] Yêu cầu lấy thông báo. User: ${userId}, Role: ${role}, isAdmin: ${isAdmin}`);
+
+    let result;
+    if (isAdmin) {
+      // Admin xem tất cả các thông báo hệ thống liên quan đến báo lỗi (new_report)
+      result = await db.query(
+        `SELECT id, type, title, message, link, is_read, created_at 
+         FROM notifications 
+         WHERE type = 'new_report'
+         ORDER BY created_at DESC 
+         LIMIT 50`
+      );
+    } else {
+      // Author chỉ xem thông báo của chính mình
+      result = await db.query(
+        `SELECT id, type, title, message, link, is_read, created_at 
+         FROM notifications 
+         WHERE author_id = $1 OR user_id = $1
+         ORDER BY created_at DESC 
+         LIMIT 50`,
+        [userId]
+      );
+    }
+
+    logDebug(`[GET_NOTIF] Trả về thành công ${result.rows.length} thông báo.`);
     res.json({ success: true, data: result.rows });
   } catch (err) {
+    logDebug(`[GET_NOTIF] ❌ Lỗi: ${err.message}`);
     next(err);
   }
 }
 
 async function markNotificationRead(req, res, next) {
   try {
-    const { userId } = req.user;
+    const { userId, role } = req.user;
     const { id } = req.params;
+    const isAdmin = role === 'admin';
 
-    const result = await db.query(
-      `UPDATE notifications 
-       SET is_read = true 
-       WHERE id = $1 AND (author_id = $2 OR user_id = $2)
-       RETURNING id`,
-      [id, userId]
-    );
+    let result;
+    if (isAdmin) {
+      result = await db.query(
+        `UPDATE notifications 
+         SET is_read = true 
+         WHERE id = $1 AND type = 'new_report'
+         RETURNING id`,
+        [id]
+      );
+    } else {
+      result = await db.query(
+        `UPDATE notifications 
+         SET is_read = true 
+         WHERE id = $1 AND (author_id = $2 OR user_id = $2)
+         RETURNING id`,
+        [id, userId]
+      );
+    }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, error: 'Thông báo không tồn tại hoặc không có quyền.' });
@@ -1177,16 +1279,155 @@ async function markNotificationRead(req, res, next) {
 
 async function markAllNotificationsRead(req, res, next) {
   try {
-    const { userId } = req.user;
+    const { userId, role } = req.user;
+    const isAdmin = role === 'admin';
 
-    await db.query(
-      `UPDATE notifications 
-       SET is_read = true 
-       WHERE (author_id = $1 OR user_id = $1) AND is_read = false`,
-      [userId]
-    );
+    if (isAdmin) {
+      await db.query(
+        `UPDATE notifications 
+         SET is_read = true 
+         WHERE type = 'new_report' AND is_read = false`
+      );
+    } else {
+      await db.query(
+        `UPDATE notifications 
+         SET is_read = true 
+         WHERE (author_id = $1 OR user_id = $1) AND is_read = false`,
+        [userId]
+      );
+    }
 
     res.json({ success: true });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function getReports(req, res, next) {
+  try {
+    const page = Math.max(1, parseInt(req.query.page) || 1);
+    const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 10));
+    const offset = (page - 1) * limit;
+    const { status, search } = req.query;
+
+    let whereConditions = [];
+    let params = [];
+    let paramIndex = 1;
+
+    if (status && status !== 'all') {
+      whereConditions.push(`r.status = $${paramIndex++}`);
+      params.push(status);
+    }
+    
+    if (search) {
+      whereConditions.push(`(r.reason ILIKE $${paramIndex} OR u.username ILIKE $${paramIndex} OR u.display_name ILIKE $${paramIndex})`);
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    const whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : '';
+
+    const countQuery = `
+      SELECT COUNT(*)
+      FROM reports r
+      LEFT JOIN users u ON r.user_id = u.id
+      ${whereClause}
+    `;
+    const countResult = await db.query(countQuery, params);
+    const total = parseInt(countResult.rows[0].count);
+
+    const dataQuery = `
+      SELECT r.id, r.user_id, r.story_id, r.comment_id, r.reason, r.status, r.created_at,
+             u.username as reporter_username, u.display_name as reporter_display_name, u.email as reporter_email,
+             s.title as story_title, s.slug as story_slug
+      FROM reports r
+      LEFT JOIN users u ON r.user_id = u.id
+      LEFT JOIN stories s ON r.story_id = s.id
+      ${whereClause}
+      ORDER BY r.created_at DESC
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+    `;
+    const dataParams = [...params, limit, offset];
+    const result = await db.query(dataQuery, dataParams);
+
+    res.json({
+      success: true,
+      data: {
+        reports: result.rows,
+        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) }
+      }
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+async function updateReportStatus(req, res, next) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // 'accepted', 'processing', 'resolved', 'rejected', 'pending'
+
+    if (!status || !['pending', 'accepted', 'processing', 'resolved', 'rejected'].includes(status)) {
+      return res.status(400).json({ success: false, error: 'Trạng thái không hợp lệ.' });
+    }
+
+    const client = await db.getClient();
+    try {
+      await client.query('BEGIN');
+
+      // Update report status and return details
+      const updateRes = await client.query(
+        `UPDATE reports 
+         SET status = $2 
+         WHERE id = $1 
+         RETURNING id, user_id, reason, status`,
+        [id, status]
+      );
+
+      if (updateRes.rows.length === 0) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ success: false, error: 'Không tìm thấy báo lỗi.' });
+      }
+
+      const report = updateRes.rows[0];
+
+      // Send notification if user_id is set
+      if (report.user_id) {
+        let statusText = '';
+        if (status === 'accepted') statusText = 'đã được chấp nhận';
+        else if (status === 'processing') statusText = 'đang được xử lý';
+        else if (status === 'resolved') statusText = 'đã xử lý hoàn tất';
+        else if (status === 'rejected') statusText = 'đã bị từ chối';
+        else statusText = 'được chuyển về chờ duyệt';
+
+        const truncateReason = report.reason.length > 50 
+          ? report.reason.substring(0, 50) + '...' 
+          : report.reason;
+
+        const title = 'Cập nhật trạng thái báo lỗi';
+        const message = `Báo lỗi của bạn [${truncateReason}] ${statusText} bởi quản trị viên.`;
+
+        await client.query(
+          `INSERT INTO notifications (user_id, type, title, message, link)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [
+            report.user_id,
+            'report_resolved',
+            title,
+            message,
+            '/profile'
+          ]
+        );
+      }
+
+      await client.query('COMMIT');
+      res.json({ success: true, data: report });
+    } catch (err) {
+      await client.query('ROLLBACK');
+      throw err;
+    } finally {
+      client.release();
+    }
   } catch (err) {
     next(err);
   }
@@ -1199,5 +1440,6 @@ module.exports = {
   getComments, updateCommentStatus, deleteComment,
   getSettings, updateSettings, getMyProfile, updateMyProfile,
   createStory, updateStory, getStoryChapters, createChapter, updateChapter, deleteChapter, getChapter,
-  getNotifications, markNotificationRead, markAllNotificationsRead
+  getNotifications, markNotificationRead, markAllNotificationsRead,
+  getReports, updateReportStatus
 };

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { fetchAdmin, getAdminUser } from '../../utils';
+import { fetchAdmin, getAdminUser, getApiBaseUrl } from '../../utils';
 
 interface Category {
   id: string;
@@ -24,21 +24,56 @@ export default function NewStoryPage() {
   const [coverImage, setCoverImage] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('ongoing');
+  const [uploading, setUploading] = useState(false);
 
-  const handleCoverImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCoverImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
+    // 1. Kiểm tra dung lượng
     if (file.size > 2 * 1024 * 1024) {
       setMessage({ type: 'error', text: 'Kích thước ảnh bìa không được vượt quá 2MB.' });
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setCoverImage(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+    // 2. Kiểm tra loại file
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      setMessage({ type: 'error', text: 'Định dạng ảnh không hợp lệ. Chỉ chấp nhận JPG, PNG hoặc WEBP.' });
+      return;
+    }
+
+    setUploading(true);
+    setMessage(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const token = localStorage.getItem('admin_token');
+      const apiBase = getApiBaseUrl();
+
+      const res = await fetch(`${apiBase}/api/admin/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCoverImage(data.url);
+        setMessage({ type: 'success', text: 'Tải ảnh bìa lên thành công!' });
+      } else {
+        throw new Error(data.error || 'Tải ảnh lên thất bại.');
+      }
+    } catch (err: any) {
+      setMessage({ type: 'error', text: err.message || 'Lỗi kết nối khi tải ảnh lên.' });
+      setCoverImage('');
+    } finally {
+      setUploading(false);
+    }
   };
 
   useEffect(() => {
@@ -171,7 +206,7 @@ export default function NewStoryPage() {
               <input
                 type="text"
                 required
-                placeholder="Ví dụ: Tru Tiên Kiếp"
+                placeholder="Nhập tiêu đề truyện..."
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl px-4 py-2.5 text-sm text-gray-800 outline-none transition-all"
@@ -230,7 +265,16 @@ export default function NewStoryPage() {
                 Ảnh bìa truyện (Tối đa 2MB)
               </label>
               <div className="flex items-start gap-4">
-                {coverImage && (
+                {uploading && (
+                  <div className="w-20 h-28 shrink-0 flex flex-col items-center justify-center rounded-lg border border-dashed border-purple-300 bg-purple-50/50 animate-pulse">
+                    <svg className="animate-spin h-5 w-5 text-purple-600 mb-1" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span className="text-[10px] text-purple-700 font-semibold">Đang tải...</span>
+                  </div>
+                )}
+                {!uploading && coverImage && (
                   <div className="w-20 h-28 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 animate-in fade-in zoom-in-95 duration-200">
                     <img src={coverImage} alt="Ảnh bìa xem trước" className="w-full h-full object-cover" />
                   </div>
@@ -239,6 +283,7 @@ export default function NewStoryPage() {
                   <input
                     type="file"
                     accept="image/*"
+                    disabled={uploading}
                     onChange={handleCoverImageChange}
                     className="block w-full text-sm text-gray-500
                       file:mr-4 file:py-2 file:px-4
@@ -246,7 +291,7 @@ export default function NewStoryPage() {
                       file:text-sm file:font-semibold
                       file:bg-purple-50 file:text-purple-700
                       hover:file:bg-purple-100
-                      cursor-pointer focus:outline-none"
+                      cursor-pointer focus:outline-none disabled:opacity-50"
                   />
                   {coverImage && (
                     <button
@@ -267,7 +312,7 @@ export default function NewStoryPage() {
                 Mô tả / Tóm tắt truyện
               </label>
               <textarea
-                placeholder="Giới thiệu nội dung tóm tắt cốt truyện của bạn..."
+                placeholder="Nhập mô tả hoặc tóm tắt truyện..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={5}

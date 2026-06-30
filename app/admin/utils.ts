@@ -12,7 +12,14 @@ export async function fetchAdmin(endpoint: string, options?: RequestInit) {
   });
   if (!res.ok) {
     const errorData = await res.json().catch(() => ({}));
-    throw new Error(errorData.error || errorData.message || `Request failed with status ${res.status}`);
+    const errorMessage = errorData.error || errorData.message || `Request failed with status ${res.status}`;
+    if (res.status === 401 || res.status === 404 || errorMessage.includes('Không tìm thấy tài khoản')) {
+      logoutAdmin();
+      if (typeof window !== 'undefined') {
+        window.location.href = '/admin/login';
+      }
+    }
+    throw new Error(errorMessage);
   }
   return res.json();
 }

@@ -11,6 +11,7 @@ import logoImg from "@/app/logo.png";
 
 interface FormErrors {
   fullName?: string;
+  username?: string;
   email?: string;
   password?: string;
   confirmPassword?: string;
@@ -172,8 +173,8 @@ function MagicalBackground() {
           p.type === 0
             ? "animate-drift-fast-active"
             : p.type === 1
-            ? "animate-drift-medium-active"
-            : "animate-drift-slow-active";
+              ? "animate-drift-medium-active"
+              : "animate-drift-slow-active";
         return (
           <div
             key={`star-${p.id}`}
@@ -215,6 +216,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState(""); // Represent name for readers, and pen name (bút danh) for authors
+  const [username, setUsername] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
   // Clear Form Data
@@ -222,6 +224,7 @@ export default function AuthPage() {
     setEmail("");
     setPassword("");
     setFullName("");
+    setUsername("");
     setConfirmPassword("");
     setErrors({});
     setSuccessMessage("");
@@ -234,9 +237,10 @@ export default function AuthPage() {
   function validateLogin(): boolean {
     const newErrors: FormErrors = {};
 
-    if (!email.trim()) {
-      newErrors.email = "Vui lòng nhập email.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    const emailVal = email.trim();
+    if (!emailVal) {
+      newErrors.email = "Vui lòng nhập email hoặc username.";
+    } else if (emailVal.includes("@") && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
       newErrors.email = "Email không hợp lệ.";
     }
 
@@ -257,6 +261,14 @@ export default function AuthPage() {
       newErrors.fullName = isAuthor ? "Vui lòng nhập bút danh." : "Vui lòng nhập họ và tên.";
     } else if (fullName.trim().length < 2) {
       newErrors.fullName = isAuthor ? "Bút danh phải có ít nhất 2 ký tự." : "Họ tên phải có ít nhất 2 ký tự.";
+    }
+
+    if (!isAuthor) {
+      if (!username.trim()) {
+        newErrors.username = "Vui lòng nhập username.";
+      } else if (!/^[a-zA-Z0-9_]{3,30}$/.test(username.trim())) {
+        newErrors.username = "Username chỉ chứa chữ cái, số, dấu gạch dưới và dài từ 3-30 ký tự.";
+      }
     }
 
     if (!email.trim()) {
@@ -323,16 +335,24 @@ export default function AuthPage() {
         return;
       }
 
+      const userPayload = {
+        id: data.data.user.id,
+        displayName: data.data.user.displayName || data.data.user.fullName,
+        fullName: data.data.user.displayName || data.data.user.fullName,
+        avatarUrl: data.data.user.avatarUrl,
+        email: data.data.user.email,
+        username: data.data.user.username,
+        role: data.data.user.role,
+      };
+
       // Save user details & token
       localStorage.setItem("token", data.data.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          id: data.data.user.id,
-          displayName: data.data.user.fullName,
-          avatarUrl: data.data.user.avatarUrl,
-        })
-      );
+      localStorage.setItem("user", JSON.stringify(userPayload));
+
+      if (data.data.user.role === 'author') {
+        localStorage.setItem("admin_token", data.data.token);
+        localStorage.setItem("admin_user", JSON.stringify(userPayload));
+      }
 
       // Dispatch a storage event so layout components can sync
       window.dispatchEvent(new Event("storage"));
@@ -364,7 +384,7 @@ export default function AuthPage() {
       const res = await fetch(`${apiBaseUrl}/api/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ fullName, email, password, role }),
+        body: JSON.stringify({ fullName, email, password, role, username }),
       });
 
       const data = await res.json();
@@ -386,9 +406,12 @@ export default function AuthPage() {
       } else {
         setSuccessMessage("Đăng ký tài khoản Độc giả thành công! Vui lòng đăng nhập.");
         setView("login");
-        // Clear password fields
+        // Clear fields
+        setEmail("");
         setPassword("");
         setConfirmPassword("");
+        setFullName("");
+        setUsername("");
       }
     } catch (err) {
       console.error("Connection error during registration:", err);
@@ -664,12 +687,12 @@ export default function AuthPage() {
           {/* Logo */}
           <div className="mb-8 text-center">
             <a href="/" className="flex items-center group transition-transform duration-300 hover:scale-105 justify-center">
-              <div className="relative w-48 h-16 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(192,132,252,0.8)] transition-all duration-300">
-                <Image 
-                  src={logoImg} 
-                  alt="Trạm Chữ Novel Logo" 
+              <div className="relative w-60 h-20 drop-shadow-[0_0_8px_rgba(192,132,252,0.5)] group-hover:drop-shadow-[0_0_12px_rgba(192,132,252,0.8)] transition-all duration-300">
+                <Image
+                  src={logoImg}
+                  alt="Trạm Chữ Novel Logo"
                   fill
-                  sizes="200px"
+                  sizes="240px"
                   className="object-contain"
                   priority
                 />
@@ -734,8 +757,8 @@ export default function AuthPage() {
                       {view === "login"
                         ? "Đăng Nhập Độc Giả"
                         : view === "register_reader"
-                        ? "Đăng Ký Độc Giả"
-                        : "Đăng Ký Tác Giả"}
+                          ? "Đăng Ký Độc Giả"
+                          : "Đăng Ký Tác Giả"}
                     </span>
                     <div className="auth-divider-line" />
                   </div>
@@ -757,10 +780,10 @@ export default function AuthPage() {
                   {/* ═══════════════════════════════════════════════ */}
                   {view === "login" && (
                     <form onSubmit={handleLogin} noValidate className="auth-animate-in">
-                      {/* Email */}
+                      {/* Email / Username */}
                       <div className="mb-4">
                         <label htmlFor="login-email" className="mb-1.5 block text-xs font-semibold tracking-wider text-purple-300 uppercase">
-                          Email Độc Giả
+                          Email hoặc Username
                         </label>
                         <div className="relative">
                           <span className="absolute left-3.5 top-1/2 -translate-y-1/2">
@@ -768,12 +791,12 @@ export default function AuthPage() {
                           </span>
                           <input
                             id="login-email"
-                            type="email"
+                            type="text"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
+                            placeholder="Nhập email hoặc username..."
                             className={`auth-input ${errors.email ? "auth-input-error" : ""}`}
-                            autoComplete="email"
+                            autoComplete="username"
                           />
                         </div>
                         {errors.email && (
@@ -795,7 +818,7 @@ export default function AuthPage() {
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Tối thiểu 6 ký tự"
+                            placeholder="Nhập mật khẩu của bạn..."
                             className={`auth-input ${errors.password ? "auth-input-error" : ""}`}
                             style={{ paddingRight: "2.75rem" }}
                             autoComplete="current-password"
@@ -880,7 +903,7 @@ export default function AuthPage() {
                             type="text"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
-                            placeholder={view === "register_author" ? "Nhập bút danh của bạn" : "Nguyễn Văn A"}
+                            placeholder={view === "register_author" ? "Nhập bút danh của bạn..." : "Nhập họ và tên của bạn..."}
                             className={`auth-input ${errors.fullName ? "auth-input-error" : ""}`}
                             autoComplete="name"
                           />
@@ -889,6 +912,34 @@ export default function AuthPage() {
                           <p className="mt-1 text-xs text-rose-400">{errors.fullName}</p>
                         )}
                       </div>
+
+                      {/* Username (Only for Readers) */}
+                      {view === "register_reader" && (
+                        <div className="mb-4">
+                          <label htmlFor="register-username" className="mb-1.5 block text-xs font-semibold tracking-wider text-purple-300 uppercase">
+                            Username
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3.5 top-1/2 -translate-y-1/2">
+                              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-400">
+                                <circle cx="12" cy="12" r="4" />
+                                <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8" />
+                              </svg>
+                            </span>
+                            <input
+                              id="register-username"
+                              type="text"
+                              value={username}
+                              onChange={(e) => setUsername(e.target.value)}
+                              placeholder="Nhập username của bạn..."
+                              className={`auth-input ${errors.username ? "auth-input-error" : ""}`}
+                            />
+                          </div>
+                          {errors.username && (
+                            <p className="mt-1 text-xs text-rose-400">{errors.username}</p>
+                          )}
+                        </div>
+                      )}
 
                       {/* Email */}
                       <div className="mb-4">
@@ -904,7 +955,7 @@ export default function AuthPage() {
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="you@example.com"
+                            placeholder="Nhập email của bạn..."
                             className={`auth-input ${errors.email ? "auth-input-error" : ""}`}
                             autoComplete="email"
                           />
@@ -928,7 +979,7 @@ export default function AuthPage() {
                             type={showPassword ? "text" : "password"}
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Tối thiểu 6 ký tự"
+                            placeholder="Nhập mật khẩu của bạn..."
                             className={`auth-input ${errors.password ? "auth-input-error" : ""}`}
                             style={{ paddingRight: "2.75rem" }}
                             autoComplete="new-password"
@@ -961,7 +1012,7 @@ export default function AuthPage() {
                             type={showConfirmPassword ? "text" : "password"}
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="Nhập lại mật khẩu"
+                            placeholder="Nhập lại mật khẩu của bạn..."
                             className={`auth-input ${errors.confirmPassword ? "auth-input-error" : ""}`}
                             style={{ paddingRight: "2.75rem" }}
                             autoComplete="new-password"

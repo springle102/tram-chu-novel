@@ -117,7 +117,7 @@ export default function AdminLoginPage() {
             <button
               type="button"
               onClick={() => setRole('admin')}
-              className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+              className={`py-2 px-1 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 ${
                 role === 'admin'
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
                   : 'text-purple-400 hover:text-purple-200'
@@ -128,7 +128,7 @@ export default function AdminLoginPage() {
             <button
               type="button"
               onClick={() => setRole('author')}
-              className={`py-2 px-3 rounded-lg text-sm font-medium transition-all duration-300 ${
+              className={`py-2 px-1 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 ${
                 role === 'author'
                   ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
                   : 'text-purple-400 hover:text-purple-200'
@@ -157,12 +157,12 @@ export default function AdminLoginPage() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
                   </svg>
                 </div>
-                <input
+                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@novelviolet.com"
+                  placeholder="Nhập email của bạn..."
                   className="w-full bg-[#130f24] border border-purple-500/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-white rounded-xl py-3 pl-10 pr-4 text-sm outline-none transition-all placeholder-purple-700"
                 />
               </div>
@@ -182,7 +182,7 @@ export default function AdminLoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
+                  placeholder="Nhập mật khẩu của bạn..."
                   className="w-full bg-[#130f24] border border-purple-500/10 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-white rounded-xl py-3 pl-10 pr-12 text-sm outline-none transition-all placeholder-purple-700"
                 />
                 <button
