@@ -46,7 +46,7 @@ app.use(
 
       const allowed = process.env.CORS_ORIGIN
         ? process.env.CORS_ORIGIN.split(",").map((s) => s.trim())
-        : ["http://localhost:3000"];
+        : ["http://localhost:3000", "https://tram-chu-novel.pages.dev"];
 
       // Kiểm tra xem origin có khớp chính xác hoặc khớp wildcard (*.pages.dev) không
       const isAllowed = allowed.some((domain) => {
