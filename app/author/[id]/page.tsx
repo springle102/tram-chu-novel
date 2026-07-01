@@ -8,6 +8,8 @@ import Header from "@/app/components/Header";
 import type { User } from "@/app/types";
 import Link from "next/link";
 
+export const runtime = 'edge';
+
 interface AuthorProfile {
   id: string;
   pen_name: string;

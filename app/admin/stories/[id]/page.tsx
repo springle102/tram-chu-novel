@@ -5,6 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchAdmin, getAdminUser, formatDate } from '../../utils';
 
+export const runtime = 'edge';
 interface Category {
   id: string;
   name: string;

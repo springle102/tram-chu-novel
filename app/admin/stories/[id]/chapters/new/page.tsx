@@ -5,6 +5,8 @@ import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { fetchAdmin, getAdminUser } from '@/app/admin/utils';
 
+export const runtime = 'edge';
+
 export default function NewChapterPage() {
   const router = useRouter();
   const params = useParams();

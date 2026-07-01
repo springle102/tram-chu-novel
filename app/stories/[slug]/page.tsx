@@ -10,6 +10,8 @@ import dynamic from "next/dynamic";
 const LoginModal = dynamic(() => import("@/app/components/LoginModal"), { ssr: false });
 import type { User } from "@/app/types";
 
+export const runtime = 'edge';
+
 // ===========================
 // SVG Icons (Magical Badges)
 // ===========================
