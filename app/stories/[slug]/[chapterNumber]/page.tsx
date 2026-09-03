@@ -56,6 +56,81 @@ function CrownIcon({ className, style }: { className?: string; style?: React.CSS
   );
 }
 
+function Sun({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2" />
+      <path d="M12 20v2" />
+      <path d="m4.93 4.93 1.41 1.41" />
+      <path d="m17.66 17.66 1.41 1.41" />
+      <path d="M2 12h2" />
+      <path d="M20 12h2" />
+      <path d="m6.34 17.66-1.41 1.41" />
+      <path d="m19.07 4.93-1.41 1.41" />
+    </svg>
+  );
+}
+
+function MoonStar({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9" />
+      <path d="M20 3v4" />
+      <path d="M22 5h-4" />
+    </svg>
+  );
+}
+
+function BookOpenText({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 7v14" />
+      <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-5a4 4 0 0 0-4 4 4 4 0 0 0-4-4z" />
+      <path d="M6 8h2" />
+      <path d="M6 12h2" />
+      <path d="M16 8h2" />
+      <path d="M16 12h2" />
+    </svg>
+  );
+}
+
 interface Story {
   id: string;
   title: string;
@@ -123,6 +198,11 @@ export default function ChapterReadingPage() {
   // ── Reader Settings ──
   const [fontSize, setFontSize] = useState(18); // default size in px
   const [theme, setTheme] = useState<"light" | "sepia" | "dark">("light");
+  const [textFormat, setTextFormat] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+  });
 
   // ── User Interaction States ──
   const [commentInput, setCommentInput] = useState("");
@@ -510,37 +590,78 @@ export default function ChapterReadingPage() {
         ) : (
           <>
         {/* ── Reader Control Settings Bar ── */}
-        <div className={`mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 rounded-xl p-3 shadow-sm border backdrop-blur-sm ${settingsBarClasses[theme]}`}>
-          {/* Font Sizes */}
-          <div className="flex items-center gap-1">
+        <div className={`mb-4 grid w-full grid-cols-1 items-center gap-3 rounded-xl p-3 shadow-sm border backdrop-blur-sm sm:grid-cols-3 sm:gap-0 ${settingsBarClasses[theme]}`}>
+          <div className="flex items-center justify-center gap-1 sm:justify-self-start">
+            {/* Font Sizes */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setFontSize(Math.max(14, fontSize - 2))}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-bold focus:outline-none transition-colors ${settingsButtonClasses[theme]}`}
+                aria-label="Giảm cỡ chữ"
+                title="Giảm cỡ chữ"
+              >
+                A-
+              </button>
+              <span className={`text-xs px-2 font-bold ${sizeLabelClasses[theme]}`}>{fontSize}px</span>
+              <button
+                onClick={() => setFontSize(Math.min(30, fontSize + 2))}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-bold focus:outline-none transition-colors ${settingsButtonClasses[theme]}`}
+                aria-label="Tăng cỡ chữ"
+                title="Tăng cỡ chữ"
+              >
+                A+
+              </button>
+            </div>
+          </div>
+
+          {/* Text Formatting */}
+          <div className="flex items-center justify-center gap-1" role="group" aria-label="Định dạng chữ">
             <button
-              onClick={() => setFontSize(Math.max(14, fontSize - 2))}
-              className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-bold focus:outline-none transition-colors ${settingsButtonClasses[theme]}`}
+              onClick={() => setTextFormat((current) => ({ ...current, bold: !current.bold }))}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg border text-sm font-black transition-colors focus:outline-none ${textFormat.bold ? "border-purple-900 bg-purple-900 text-white shadow-sm" : settingsButtonClasses[theme]}`}
+              aria-label="In đậm"
+              aria-pressed={textFormat.bold}
+              title="In đậm"
             >
-              A-
+              <span aria-hidden="true">B</span>
             </button>
-            <span className={`text-xs px-2 font-bold ${sizeLabelClasses[theme]}`}>{fontSize}px</span>
             <button
-              onClick={() => setFontSize(Math.min(30, fontSize + 2))}
-              className={`flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-bold focus:outline-none transition-colors ${settingsButtonClasses[theme]}`}
+              onClick={() => setTextFormat((current) => ({ ...current, italic: !current.italic }))}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg border text-sm font-bold italic transition-colors focus:outline-none ${textFormat.italic ? "border-purple-900 bg-purple-900 text-white shadow-sm" : settingsButtonClasses[theme]}`}
+              aria-label="In nghiêng"
+              aria-pressed={textFormat.italic}
+              title="In nghiêng"
             >
-              A+
+              <span aria-hidden="true">I</span>
+            </button>
+            <button
+              onClick={() => setTextFormat((current) => ({ ...current, underline: !current.underline }))}
+              className={`flex h-8 w-8 items-center justify-center rounded-lg border text-sm font-bold underline decoration-2 underline-offset-2 transition-colors focus:outline-none ${textFormat.underline ? "border-purple-900 bg-purple-900 text-white shadow-sm" : settingsButtonClasses[theme]}`}
+              aria-label="Gạch dưới"
+              aria-pressed={textFormat.underline}
+              title="Gạch dưới"
+            >
+              <span aria-hidden="true">U</span>
             </button>
           </div>
 
           {/* Color Themes */}
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-2 sm:justify-self-end">
             {(["light", "sepia", "dark"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTheme(t)}
-                className={`rounded-lg px-3 py-1.5 text-xs font-semibold uppercase tracking-wider transition-all border ${
+                className={`inline-flex items-center justify-center rounded-lg text-xs font-semibold uppercase tracking-wider transition-all border ${
                   theme === t
                     ? "bg-purple-900 border-purple-900 text-white shadow-sm"
                     : `${settingsButtonClasses[theme]}`
-                }`}
+                } h-8 w-8 p-1.5`}
+                aria-label={t === "light" ? "Giao diện sáng" : t === "dark" ? "Giao diện tối" : "Giao diện sepia"}
+                title={t === "light" ? "Giao diện sáng" : t === "dark" ? "Giao diện tối" : "Giao diện sepia"}
               >
-                {t}
+                {t === "light" && <Sun className="h-4 w-4" />}
+                {t === "dark" && <MoonStar className="h-4 w-4" />}
+                {t === "sepia" && <BookOpenText className="h-4 w-4" />}
               </button>
             ))}
           </div>
@@ -568,7 +689,7 @@ export default function ChapterReadingPage() {
               overflowWrap: "anywhere",
               wordBreak: "break-word",
             }}
-            className="reader-content leading-relaxed whitespace-pre-line font-sans text-justify"
+            className={`reader-content leading-relaxed whitespace-pre-line font-sans text-justify ${textFormat.bold ? "font-bold" : "font-normal"} ${textFormat.italic ? "italic" : "not-italic"} ${textFormat.underline ? "underline decoration-2 underline-offset-2" : "no-underline"}`}
           >
             {chapter.content}
           </div>
