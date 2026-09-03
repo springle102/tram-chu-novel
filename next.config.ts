@@ -6,6 +6,9 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ['lucide-react', 'date-fns', 'lodash'],
+    // Không đưa source map server vào Pages Functions bundle production.
+    // Điều này giúp giữ bundle dưới giới hạn 25 MiB của Cloudflare Pages.
+    serverSourceMaps: false,
   },
   turbopack: {},
   webpack: (config, { isServer }) => {
