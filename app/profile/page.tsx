@@ -502,7 +502,7 @@ export default function ProfilePage() {
                 ) : bookshelfStories.length === 0 ? (
                   <div className="text-center py-20 bg-purple-50/30 rounded-2xl border-2 border-dashed border-purple-200">
                     <p className="text-sm text-purple-950/60 font-bold">Tủ sách trống</p>
-                    <p className="text-xs text-purple-500/80 mt-1">Vui lòng thêm truyện mới vào database để hiển thị.</p>
+                    <p className="text-xs text-purple-500/80 mt-1">Bạn chưa lưu bộ truyện nào, hãy tìm bộ truyện mình yêu thích và lưu vào nhé!</p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6">

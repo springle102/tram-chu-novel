@@ -238,7 +238,6 @@ export default function AdminStoriesPage() {
                     <th className="py-3 px-4 w-[110px] text-center whitespace-nowrap">Bìa</th>
                     <th className="py-3 px-4 text-center">Tên truyện</th>
                     {isAdmin && <th className="py-3 px-4 text-center">Tác giả</th>}
-                    <th className="py-3 px-4 text-center">Thể loại</th>
                     <th className="py-3 px-4 w-[150px] text-center whitespace-nowrap">Trạng thái</th>
                     <th className="py-3 px-4 text-center">Lượt xem</th>
                     <th className="py-3 px-4 text-center">Đánh giá</th>
@@ -265,22 +264,6 @@ export default function AdminStoriesPage() {
                         <p className="text-xs text-gray-400 font-mono mt-0.5 truncate max-w-[200px]">{story.slug}</p>
                       </td>
                       {isAdmin && <td className="py-2.5 px-4 text-gray-600 font-medium">{story.author_name}</td>}
-                      <td className="py-2.5 px-4">
-                        <div className="flex flex-wrap gap-1 max-w-[200px]">
-                          {story.categories && story.categories.length > 0 ? (
-                            story.categories.map((cat) => (
-                              <span
-                                key={cat.id}
-                                className="inline-flex items-center px-2 py-0.5 text-xs font-medium rounded-full bg-purple-50 text-purple-700 border border-purple-100"
-                              >
-                                {cat.name}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-gray-400 text-xs italic">Không có</span>
-                          )}
-                        </div>
-                      </td>
                       <td className="py-2.5 px-4 text-center">
                         <span className={`inline-flex px-2.5 py-0.5 text-xs font-bold rounded-full border whitespace-nowrap ${
                           story.status === 'completed'
@@ -329,7 +312,7 @@ export default function AdminStoriesPage() {
                   ))}
                   {stories.length === 0 && (
                     <tr>
-                      <td colSpan={10} className="py-12 text-center text-gray-400 font-semibold">
+                      <td colSpan={isAdmin ? 9 : 8} className="py-12 text-center text-gray-400 font-semibold">
                         Không tìm thấy truyện nào thỏa mãn bộ lọc.
                       </td>
                     </tr>

@@ -2,17 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import dynamic from "next/dynamic";
-const LoginModal = dynamic(() => import("./LoginModal"), { ssr: false });
+import LoginModal from "./LoginModal";
 
 export default function GlobalReportButton() {
   const pathname = usePathname();
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-  // Hide on admin and auth routes
-  if (pathname?.startsWith("/admin") || pathname?.startsWith("/auth")) {
-    return null;
-  }
 
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [reportReason, setReportReason] = useState("");
@@ -44,6 +38,11 @@ export default function GlobalReportButton() {
       setShowTooltip(true);
     }
   }, []);
+
+  // Hide on admin and auth routes after all hooks have been called.
+  if (pathname?.startsWith("/admin") || pathname?.startsWith("/auth")) {
+    return null;
+  }
 
   const handleDismissTooltip = () => {
     localStorage.setItem("report_tooltip_dismissed", "true");

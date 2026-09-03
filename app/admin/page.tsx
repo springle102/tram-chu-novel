@@ -68,6 +68,7 @@ interface AuthorDashboardData {
 
 export default function AdminDashboardPage() {
   const [role, setRole] = useState<string>('');
+  const [userName, setUserName] = useState('');
   const [adminData, setAdminData] = useState<AdminDashboardData | null>(null);
   const [authorData, setAuthorData] = useState<AuthorDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -77,6 +78,7 @@ export default function AdminDashboardPage() {
     const user = getAdminUser();
     if (user) {
       setRole(user.role);
+      setUserName(user.fullName || user.email);
       loadDashboardData();
     }
   }, []);
@@ -140,8 +142,14 @@ export default function AdminDashboardPage() {
     <div className="space-y-8">
       {/* Welcome Message */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-800">Xin chào quay trở lại!</h1>
-        <p className="text-sm text-gray-500 mt-1">Dưới đây là tóm tắt hoạt động hệ thống của Trạm Chữ Novel.</p>
+        <h1 className="text-2xl font-bold text-gray-800">
+          {userName ? `Xin chào bạn, ${userName}!` : 'Xin chào bạn!'}
+        </h1>
+        <p className="text-sm text-gray-500 mt-1">
+          {role === 'author'
+            ? 'Đây là bảng tóm tắt hoạt động của bạn.'
+            : 'Dưới đây là tóm tắt hoạt động hệ thống của Trạm Chữ Novel.'}
+        </p>
       </div>
 
       {isAdmin && adminData ? (

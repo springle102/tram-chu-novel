@@ -6,8 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import logoImg from "@/app/logo.png";
 import Header from "@/app/components/Header";
-import dynamic from "next/dynamic";
-const LoginModal = dynamic(() => import("@/app/components/LoginModal"), { ssr: false });
+import LoginModal from "@/app/components/LoginModal";
 import type { User } from "@/app/types";
 
 export const runtime = 'edge';

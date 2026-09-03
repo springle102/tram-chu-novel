@@ -120,7 +120,7 @@ export default function AdminReadersPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Quản lý Độc giả</h1>
-        <p className="text-sm text-gray-500 mt-1">Danh sách tài khoản độc giả (Reader) trên hệ thống Violet.</p>
+        <p className="text-sm text-gray-500 mt-1">Danh sách tài khoản độc giả trên hệ thống Trạm Chữ Novel.</p>
       </div>
 
       {/* Search Bar Block */}

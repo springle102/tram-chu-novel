@@ -547,6 +547,22 @@ async function getStoryChapters(req, res, next) {
 // ────────────────────────────────────────────────────────────
 // Lấy chi tiết chương của truyện theo slug + chapter_number
 // ────────────────────────────────────────────────────────────
+function formatChapterForReader(chapter, unlocked = false) {
+  const hasPassword = typeof chapter.password === "string" && chapter.password.trim().length > 0;
+  const publicChapter = { ...chapter };
+
+  // Không bao giờ gửi mật khẩu thật về phía trình duyệt.
+  delete publicChapter.password;
+
+  return {
+    ...publicChapter,
+    content: hasPassword && !unlocked ? null : chapter.content,
+    is_password_protected: hasPassword && !unlocked,
+    password_question: hasPassword ? chapter.password_question : null,
+    password_hint: hasPassword ? chapter.password_hint : null,
+  };
+}
+
 async function getChapterByNumber(req, res, next) {
   try {
     const { slug, chapterNumber } = req.params;
@@ -563,7 +579,7 @@ async function getChapterByNumber(req, res, next) {
     const story = storyCheck.rows[0];
 
     const chapterQuery = `
-      SELECT id, chapter_number, title, content, word_count, view_count, created_at
+      SELECT id, chapter_number, title, content, word_count, view_count, password, password_question, password_hint, created_at
       FROM chapters
       WHERE story_id = $1 AND chapter_number = $2 AND is_published = true
     `;
@@ -574,8 +590,69 @@ async function getChapterByNumber(req, res, next) {
     }
 
     const chapter = result.rows[0];
+    const hasPassword = typeof chapter.password === "string" && chapter.password.trim().length > 0;
 
-    // Tăng view_count chương nền bất đồng bộ
+    // Chỉ tính lượt đọc ngay khi chương không bị khóa.
+    if (!hasPassword) {
+      db.query("UPDATE chapters SET view_count = view_count + 1 WHERE id = $1", [chapter.id])
+        .catch((err) => console.error("[Chapters] Failed to increment view_count:", err.message));
+    }
+
+    res.json({
+      success: true,
+      data: {
+        story,
+        chapter: formatChapterForReader(chapter),
+      },
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// POST /api/stories/:slug/chapters/:chapterNumber/unlock
+// ────────────────────────────────────────────────────────────
+// Kiểm tra mật khẩu và chỉ trả nội dung chương sau khi mở khóa thành công.
+// ────────────────────────────────────────────────────────────
+async function unlockChapter(req, res, next) {
+  try {
+    const { slug, chapterNumber } = req.params;
+    const chapterPassword = req.body?.password;
+    const chNum = parseInt(chapterNumber, 10);
+
+    if (isNaN(chNum)) {
+      return res.status(400).json({ success: false, error: "Số chương không hợp lệ." });
+    }
+
+    if (typeof chapterPassword !== "string" || !chapterPassword.trim()) {
+      return res.status(400).json({ success: false, error: "Vui lòng nhập mật khẩu chương." });
+    }
+
+    const storyCheck = await db.query("SELECT id, title, slug, author_id FROM stories WHERE slug = $1", [slug]);
+    if (storyCheck.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Không tìm thấy truyện." });
+    }
+    const story = storyCheck.rows[0];
+
+    const chapterQuery = `
+      SELECT id, chapter_number, title, content, word_count, view_count, password, password_question, password_hint, created_at
+      FROM chapters
+      WHERE story_id = $1 AND chapter_number = $2 AND is_published = true
+    `;
+    const result = await db.query(chapterQuery, [story.id, chNum]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, error: "Không tìm thấy chương này." });
+    }
+
+    const chapter = result.rows[0];
+    const hasPassword = typeof chapter.password === "string" && chapter.password.trim().length > 0;
+
+    if (hasPassword && chapterPassword.trim() !== chapter.password.trim()) {
+      return res.status(403).json({ success: false, error: "Mật khẩu chương không chính xác." });
+    }
+
     db.query("UPDATE chapters SET view_count = view_count + 1 WHERE id = $1", [chapter.id])
       .catch((err) => console.error("[Chapters] Failed to increment view_count:", err.message));
 
@@ -583,7 +660,7 @@ async function getChapterByNumber(req, res, next) {
       success: true,
       data: {
         story,
-        chapter,
+        chapter: formatChapterForReader(chapter, true),
       },
     });
   } catch (err) {
@@ -1173,6 +1250,7 @@ module.exports = {
   createStory,
   getStoryChapters,
   getChapterByNumber,
+  unlockChapter,
   getStoryComments,
   createStoryComment,
   checkStoryInteraction,

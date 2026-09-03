@@ -26,16 +26,31 @@ function HomeContent() {
   const [matchingAuthors, setMatchingAuthors] = useState<any[]>([]);
 
   // ── Filter & Search State ──
-  const [selectedCategory, setSelectedCategory] = useState("Tất cả");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<string | null>(null);
+  // Initialize from the URL so the first request already contains the active filter.
+  // Otherwise navigating directly to /?status=completed briefly fetches all stories,
+  // and that response can overwrite the filtered response when requests finish out of order.
+  const [selectedCategory, setSelectedCategory] = useState(
+    () => searchParams.get("category") || "Tất cả"
+  );
+  const [searchQuery, setSearchQuery] = useState(
+    () => searchParams.get("search") || ""
+  );
+  const [selectedStatus, setSelectedStatus] = useState<string | null>(
+    () => searchParams.get("status") || null
+  );
 
   // ── Pagination State ──
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
   // ── Fetch Stories from Backend API ──
-  async function fetchStories(page: number, category: string, search: string, status?: string | null) {
+  async function fetchStories(
+    page: number,
+    category: string,
+    search: string,
+    status?: string | null,
+    signal?: AbortSignal
+  ) {
     try {
       const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
       console.log(`[FRONTEND] Đang gọi API lấy danh sách truyện trang ${page}...`);
@@ -50,13 +65,14 @@ function HomeContent() {
         url += `&status=${encodeURIComponent(status)}`;
       }
       
-      const res = await fetch(url, { cache: "no-store" });
+      const res = await fetch(url, { cache: "no-store", signal });
       
       if (!res.ok) {
         throw new Error(`HTTP error! status: ${res.status}`);
       }
       
       const data = await res.json();
+      if (signal?.aborted) return;
       console.log("Data nhận được ở Frontend:", data);
 
       if (data.success && data.data) {
@@ -79,9 +95,13 @@ function HomeContent() {
       // Fetch matching authors if search query exists
       if (search && search.trim() && search !== "null" && search !== "undefined") {
         try {
-          const authorRes = await fetch(`${apiBaseUrl}/api/authors?search=${encodeURIComponent(search.trim())}`, { cache: "no-store" });
+          const authorRes = await fetch(`${apiBaseUrl}/api/authors?search=${encodeURIComponent(search.trim())}`, {
+            cache: "no-store",
+            signal,
+          });
           if (authorRes.ok) {
             const authorData = await authorRes.json();
+            if (signal?.aborted) return;
             if (authorData.success && Array.isArray(authorData.data)) {
               setMatchingAuthors(authorData.data);
             } else {
@@ -91,6 +111,9 @@ function HomeContent() {
             setMatchingAuthors([]);
           }
         } catch (err) {
+          if (err instanceof Error && err.name === "AbortError") {
+            return;
+          }
           console.error("Lỗi khi tải thông tin tác giả:", err);
           setMatchingAuthors([]);
         }
@@ -98,13 +121,21 @@ function HomeContent() {
         setMatchingAuthors([]);
       }
     } catch (err) {
+      // A filter change cancels the previous request. It must not be treated as an error
+      // or allow the old request to update the UI after the new filter is selected.
+      if (err instanceof Error && err.name === "AbortError") {
+        return;
+      }
       console.error("Lỗi khi tải danh sách truyện ở Frontend:", err);
     }
   }
 
   // ── Fetch stories when current page, category, search, or status changes ──
   useEffect(() => {
-    fetchStories(currentPage, selectedCategory, searchQuery, selectedStatus);
+    const controller = new AbortController();
+    fetchStories(currentPage, selectedCategory, searchQuery, selectedStatus, controller.signal);
+
+    return () => controller.abort();
   }, [currentPage, selectedCategory, searchQuery, selectedStatus]);
 
   // ── Sync with URL parameters reactively ──

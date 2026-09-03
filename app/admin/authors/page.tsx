@@ -160,7 +160,7 @@ export default function AdminAuthorsPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-800">Quản lý Tác giả</h1>
-        <p className="text-sm text-gray-500 mt-1">Danh sách tài khoản tác giả (Author) và quản lý tác phẩm của họ.</p>
+        <p className="text-sm text-gray-500 mt-1">Danh sách tài khoản tác giả và các tác phẩm.</p>
       </div>
 
       {/* Search Bar Block */}
@@ -238,8 +238,7 @@ export default function AdminAuthorsPage() {
                             Bị khóa
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-600 border border-emerald-200">
                             Hoạt động
                           </span>
                         )}
@@ -247,12 +246,9 @@ export default function AdminAuthorsPage() {
                       <td className="py-4 px-6 text-center">
                         <button
                           onClick={() => setViewingAuthor({ id: u.id, username: u.username })}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 hover:border-purple-300 font-semibold rounded-lg text-xs transition-all"
+                          className="inline-flex items-center px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 hover:border-purple-300 font-semibold rounded-lg text-xs transition-all"
                         >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253" />
-                          </svg>
-                          Xem tác phẩm
+                          Xem
                         </button>
                       </td>
                       <td className="py-4 px-6 text-center">

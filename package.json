@@ -4,7 +4,10 @@
   "private": true,
   "scripts": {
     "clean": "node -e \"const fs = require('fs'); ['.next', 'node_modules/.cache'].forEach(p => fs.rmSync(p, { recursive: true, force: true }))\"",
-    "dev": "next dev",
+    "dev": "node dev.js",
+    "dev:frontend": "next dev -p 3000",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:all": "node dev.js",
     "build": "next build",
     "pages:build": "npx @cloudflare/next-on-pages",
     "start": "next start",

@@ -711,7 +711,7 @@ export default function StoryDetailPage() {
                     </div>
                   ) : (
                     <div className="prose prose-purple max-w-none">
-                      <div className="whitespace-pre-line text-gray-700 font-serif leading-relaxed text-[15px] space-y-4">
+                      <div className="reader-content whitespace-pre-line text-gray-700 font-serif leading-relaxed text-[15px] space-y-4">
                         {previewContent}
                       </div>
                     </div>

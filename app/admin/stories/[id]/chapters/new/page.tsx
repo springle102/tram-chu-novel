@@ -190,9 +190,9 @@ export default function NewChapterPage() {
       )}
 
       {isAuthor && (
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <form onSubmit={handleSubmit} className="min-w-0 grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main content area: Title & Body editor */}
-          <div className="lg:col-span-3 space-y-6">
+          <div className="min-w-0 lg:col-span-3 space-y-6">
             <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm space-y-4">
               {/* Title input */}
               <div>
@@ -221,11 +221,12 @@ export default function NewChapterPage() {
                 </div>
                 <textarea
                   required
+                  wrap="soft"
                   placeholder="Nhập nội dung chương truyện tại đây..."
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={20}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl p-4 text-sm text-gray-800 outline-none transition-all font-serif leading-relaxed"
+                  className="reader-content w-full bg-gray-50 border border-gray-200 focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500 rounded-xl p-4 text-sm text-gray-800 outline-none transition-all font-serif leading-relaxed"
                 />
               </div>
 

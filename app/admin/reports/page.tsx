@@ -165,31 +165,27 @@ export default function AdminReportsPage() {
 
       {/* Filters & Search bar */}
       <div className="bg-white border border-gray-150 p-5 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        {/* Status tabs */}
-        <div className="flex flex-wrap gap-1.5 border-b border-gray-100 pb-3 md:border-b-0 md:pb-0">
-          {[
-            { id: 'all', label: 'Tất cả' },
-            { id: 'pending', label: 'Chờ duyệt' },
-            { id: 'accepted', label: 'Đã chấp nhận' },
-            { id: 'processing', label: 'Đang xử lý' },
-            { id: 'resolved', label: 'Hoàn tất' },
-            { id: 'rejected', label: 'Đã từ chối' }
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setStatusFilter(tab.id);
-                setPage(1);
-              }}
-              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all ${
-                statusFilter === tab.id
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'bg-gray-50 hover:bg-gray-100 text-gray-600'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* Status filter */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <label htmlFor="report-status-filter" className="text-xs font-bold text-gray-600 whitespace-nowrap">
+            Lọc trạng thái
+          </label>
+          <select
+            id="report-status-filter"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="w-full md:w-52 rounded-xl border border-gray-200 bg-gray-50 px-3.5 py-2 text-xs font-semibold text-gray-700 focus:border-gray-200 focus:outline-none focus:ring-0"
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="pending">Chờ duyệt</option>
+            <option value="accepted">Đã chấp nhận</option>
+            <option value="processing">Đang xử lý</option>
+            <option value="resolved">Hoàn tất</option>
+            <option value="rejected">Đã từ chối</option>
+          </select>
         </div>
 
         {/* Search form */}

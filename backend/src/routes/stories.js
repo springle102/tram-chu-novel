@@ -33,6 +33,10 @@ router.get("/:slug/chapters", storiesController.getStoryChapters);
 // Lấy chi tiết chương theo số chương
 router.get("/:slug/chapters/:chapterNumber", storiesController.getChapterByNumber);
 
+// POST /api/stories/:slug/chapters/:chapterNumber/unlock
+// Mở khóa chương bằng mật khẩu do tác giả thiết lập
+router.post("/:slug/chapters/:chapterNumber/unlock", storiesController.unlockChapter);
+
 // GET /api/stories/:slug/comments
 // Lấy bình luận của truyện/chương
 router.get("/:slug/comments", storiesController.getStoryComments);

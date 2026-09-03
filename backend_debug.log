@@ -281,3 +281,293 @@
 [2026-06-30T16:36:24.847Z] [GET_NOTIF] Trả về thành công 0 thông báo.
 [2026-06-30T16:36:54.895Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
 [2026-06-30T16:36:56.737Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-02T17:59:32.224Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-02T17:59:32.241Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-02T17:59:32.258Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-02T17:59:32.264Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-02T18:00:06.213Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU02, Role: author, isAdmin: false
+[2026-09-02T18:00:06.219Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-02T18:00:06.225Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU02, Role: author, isAdmin: false
+[2026-09-02T18:00:06.228Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-02T18:00:36.176Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU02, Role: author, isAdmin: false
+[2026-09-02T18:00:36.180Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-02T18:07:06.143Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-02T18:07:06.149Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-02T18:07:06.155Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-02T18:07:06.160Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-02T18:07:36.823Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-02T18:07:36.825Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-03T05:25:53.764Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:25:53.782Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:25:53.797Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:25:53.928Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:26:24.593Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:26:24.595Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:26:54.594Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:26:54.596Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:27:23.765Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:27:23.769Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:27:53.770Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:27:53.773Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:28:23.764Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:28:23.767Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:28:53.777Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:28:53.839Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:29:23.771Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:29:23.775Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:29:54.607Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:29:54.609Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:30:24.609Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:30:24.612Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:30:54.602Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:30:54.604Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:31:24.601Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:31:24.603Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:32:43.619Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:32:43.684Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:33:43.626Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:33:43.823Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:34:43.615Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:34:43.785Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:35:43.618Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:35:43.681Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:36:43.624Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:36:43.796Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:37:43.616Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:37:43.697Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:38:43.642Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:38:43.716Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:39:43.597Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:39:43.659Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:40:43.598Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:40:43.660Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:41:43.612Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:41:43.687Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:42:00.332Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:42:00.334Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:42:23.769Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:42:23.772Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:42:54.598Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:42:54.600Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:43:24.605Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:43:24.607Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:43:54.600Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:43:54.603Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:44:43.597Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:44:43.599Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:45:30.186Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:45:30.189Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:45:52.931Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T05:45:52.937Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-03T05:45:52.945Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T05:45:52.950Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-03T05:46:10.801Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:46:10.807Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:46:10.813Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:46:10.817Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:46:41.609Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:46:41.612Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:47:11.607Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:47:11.609Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:47:41.604Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:47:41.608Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:48:11.594Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:48:11.596Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:48:40.768Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:48:40.776Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:49:11.608Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:49:11.611Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:49:41.601Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:49:41.603Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:50:43.600Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:50:43.664Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:51:03.944Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:51:03.948Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:51:03.952Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:51:03.954Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:51:34.604Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:51:34.606Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:52:04.600Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:52:04.602Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:52:34.602Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:52:34.604Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:53:03.952Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:53:03.956Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:53:34.598Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:53:34.656Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:54:04.608Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:54:04.610Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:54:34.606Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:54:34.608Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:55:03.964Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:55:03.967Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:55:34.603Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:55:34.605Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:56:03.950Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:56:03.953Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:56:34.633Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:56:34.780Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:57:03.957Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:57:03.960Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:57:34.602Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:57:34.605Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:58:04.609Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:58:04.611Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:58:43.613Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:58:43.615Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T05:59:43.610Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T05:59:43.673Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:00:43.616Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:00:43.781Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:01:43.605Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:01:43.674Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:02:43.600Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:02:43.654Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:03:43.604Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:03:43.662Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:04:43.617Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:04:43.782Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:05:03.948Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:05:03.950Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:05:34.612Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:05:34.617Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:06:04.597Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:06:04.602Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:06:43.601Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:06:43.603Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:07:43.597Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:07:43.599Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:08:43.607Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:08:43.611Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:09:04.602Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:09:04.609Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:09:34.593Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:09:34.595Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:10:43.609Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:10:43.611Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:11:14.053Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:11:14.055Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:11:34.603Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:11:34.605Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:12:03.964Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:12:03.967Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:12:34.601Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:12:34.604Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:13:04.593Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:13:04.595Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:13:43.759Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:13:43.810Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:14:40.759Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:14:40.762Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:15:33.320Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:15:33.335Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:15:33.345Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:15:33.347Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:15:51.660Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:15:51.691Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-03T06:15:51.706Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:15:51.717Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-03T06:16:04.520Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:16:04.528Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-03T06:16:10.330Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:16:10.340Z] [GET_NOTIF] Trả về thành công 3 thông báo.
+[2026-09-03T06:20:59.198Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:20:59.211Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:20:59.222Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:20:59.224Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:21:29.601Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:21:29.603Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:21:59.595Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:21:59.597Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:22:18.175Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:22:18.199Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:22:18.217Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:22:18.221Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:22:45.143Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:22:45.148Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:22:45.151Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:22:45.153Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:22:48.600Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:22:48.604Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:22:51.203Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:22:51.206Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:23:15.606Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:23:15.609Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:23:18.123Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:23:18.126Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:23:45.608Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:23:45.613Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:23:48.599Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:23:48.602Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:24:15.601Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:24:15.605Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:24:18.603Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:24:18.606Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:24:45.594Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:24:45.598Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:24:48.593Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:24:48.596Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:25:00.822Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:25:00.908Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:25:00.915Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:25:00.918Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:25:18.605Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:25:18.609Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:25:31.604Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:25:31.606Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:25:45.393Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:25:45.399Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:25:45.408Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:25:45.412Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:25:52.924Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:25:52.952Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:25:52.975Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:25:52.986Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:26:01.602Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:26:01.608Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:26:26.843Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:26:26.849Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:26:26.854Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:26:26.857Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:26:31.603Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:26:31.615Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:26:57.605Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:26:57.608Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:27:01.604Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:27:01.614Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:27:27.603Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:27:27.606Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:27:31.592Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:27:31.600Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:27:57.615Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:27:57.618Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:28:00.755Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AU01, Role: author, isAdmin: false
+[2026-09-03T06:28:00.757Z] [GET_NOTIF] Trả về thành công 7 thông báo.
+[2026-09-03T06:28:24.378Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:28:24.387Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:28:24.392Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:28:24.399Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:28:31.614Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:28:31.620Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:28:54.355Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:28:54.359Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:29:01.609Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:29:01.612Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:29:24.598Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:29:24.600Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:29:39.635Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:29:39.637Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:29:54.344Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:29:54.347Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:30:24.606Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:30:24.614Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:30:43.608Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:30:43.609Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:30:54.466Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:30:54.468Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:31:24.338Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:31:24.346Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:31:43.611Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:31:43.616Z] [GET_NOTIF] Trả về thành công 0 thông báo.
+[2026-09-03T06:31:54.611Z] [GET_NOTIF] Yêu cầu lấy thông báo. User: AD01, Role: admin, isAdmin: true
+[2026-09-03T06:31:54.614Z] [GET_NOTIF] Trả về thành công 0 thông báo.

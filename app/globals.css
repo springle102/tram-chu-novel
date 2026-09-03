@@ -49,6 +49,14 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Keep long unbroken strings in chapter text inside the reader card. */
+.reader-content {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 /* Scrollbar styling */
 ::-webkit-scrollbar {
   width: 8px;

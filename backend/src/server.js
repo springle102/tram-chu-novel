@@ -94,6 +94,9 @@ app.use((req, _res, next) => {
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
   max: 100, // Tối đa 100 requests từ một IP
+  // Local development makes several requests during HMR and page reloads.
+  // Keep the protection enabled in production, but do not block localhost.
+  skip: () => process.env.NODE_ENV !== "production",
   message: {
     success: false,
     error: "Quá nhiều yêu cầu từ địa chỉ IP này. Vui lòng quay lại sau 15 phút.",

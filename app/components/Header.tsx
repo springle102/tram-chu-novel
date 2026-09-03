@@ -141,10 +141,15 @@ export default function Header({
 
   // Load categories from database
   useEffect(() => {
+    const controller = new AbortController();
+
     async function loadCategories() {
       try {
         const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const res = await fetch(`${apiBaseUrl}/api/categories`, { cache: "no-store" });
+        const res = await fetch(`${apiBaseUrl}/api/categories`, {
+          cache: "no-store",
+          signal: controller.signal,
+        });
         if (res.ok) {
           const json = await res.json();
           if (json.success && Array.isArray(json.data)) {
@@ -153,10 +158,15 @@ export default function Header({
           }
         }
       } catch (err) {
-        console.error("Failed to fetch categories:", err);
+        // The header can still render with the default category when the API is
+        // temporarily unavailable (for example while the backend is starting).
+        if (err instanceof Error && err.name === "AbortError") return;
+        console.warn("Không thể tải danh mục truyện:", err);
       }
     }
     loadCategories();
+
+    return () => controller.abort();
   }, []);
 
   const dropdownRef = useRef<HTMLDivElement>(null);

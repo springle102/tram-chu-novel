@@ -118,6 +118,10 @@ export default function AdminSettingsPage() {
       });
 
       if (res.success) {
+        window.dispatchEvent(new CustomEvent('site-favicon-updated', {
+          detail: { faviconUrl },
+        }));
+        localStorage.setItem('site-favicon-updated-at', String(Date.now()));
         showToast('Đã lưu cấu hình hệ thống thành công.');
         loadSettings();
       } else {

@@ -139,6 +139,7 @@ router.get("/authors/:id", async (req, res, next) => {
 router.get("/settings", async (req, res, next) => {
   try {
     const db = require("../config/db");
+    res.set("Cache-Control", "no-store, max-age=0");
     // Chỉ trả về public settings để bảo mật, hoặc toàn bộ nếu site_settings không chứa nhạy cảm
     const result = await db.query('SELECT key, value, description FROM site_settings ORDER BY key ASC');
     res.json({
@@ -153,4 +154,3 @@ router.get("/settings", async (req, res, next) => {
 // router.use("/chapters", chaptersRoutes);
 
 module.exports = router;
-

@@ -8,7 +8,6 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'admin' | 'author'>('admin');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -39,11 +38,10 @@ export default function AdminLoginPage() {
 
     try {
       const apiBase = getApiBaseUrl();
-      const endpoint = role === 'admin' ? '/api/admin/login' : '/api/auth/login';
-      const res = await fetch(`${apiBase}${endpoint}`, {
+      const res = await fetch(`${apiBase}/api/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await res.json();
@@ -57,10 +55,6 @@ export default function AdminLoginPage() {
         const loggedUser = responseData.user;
         if (loggedUser.role !== 'admin' && loggedUser.role !== 'author') {
           throw new Error('Tài khoản của bạn không có quyền truy cập trang quản trị.');
-        }
-
-        if (loggedUser.role !== role) {
-          throw new Error(`Vai trò đã chọn không khớp với vai trò của tài khoản này.`);
         }
 
         localStorage.setItem('admin_token', responseData.token);
@@ -110,32 +104,6 @@ export default function AdminLoginPage() {
             </div>
             <h1 className="text-2xl font-bold text-white tracking-wide">Trạm Chữ Novel</h1>
             <p className="text-xs text-purple-400 mt-1 uppercase tracking-widest font-semibold">Cổng quản trị hệ thống</p>
-          </div>
-
-          {/* Role Toggle Selector */}
-          <div className="grid grid-cols-2 gap-2 p-1 bg-[#130f24] rounded-xl border border-purple-500/10 mb-6">
-            <button
-              type="button"
-              onClick={() => setRole('admin')}
-              className={`py-2 px-1 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 ${
-                role === 'admin'
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
-                  : 'text-purple-400 hover:text-purple-200'
-              }`}
-            >
-              Administrator
-            </button>
-            <button
-              type="button"
-              onClick={() => setRole('author')}
-              className={`py-2 px-1 sm:px-3 rounded-lg text-xs sm:text-sm font-medium transition-all duration-300 ${
-                role === 'author'
-                  ? 'bg-purple-600 text-white shadow-md shadow-purple-900/30'
-                  : 'text-purple-400 hover:text-purple-200'
-              }`}
-            >
-              Tác giả (Author)
-            </button>
           </div>
 
           {error && (

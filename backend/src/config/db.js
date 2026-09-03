@@ -8,10 +8,14 @@
 
 const { Pool } = require("pg");
 
-const isProduction = process.env.NODE_ENV === "production" || !!process.env.DATABASE_URL;
+// In development, always use the local DB_* settings even if a production
+// DATABASE_URL is still present in the developer's .env file. This prevents a
+// stale Neon URL from redirecting local startup to the cloud database.
+const isProduction = process.env.NODE_ENV === "production";
+const useDatabaseUrl = isProduction && !!process.env.DATABASE_URL;
 
 // ── Khởi tạo cấu hình Connection Pool ──
-const poolConfig = process.env.DATABASE_URL
+const poolConfig = useDatabaseUrl
   ? {
       connectionString: process.env.DATABASE_URL,
     }
@@ -33,7 +37,7 @@ poolConfig.idleTimeoutMillis = 30000;
 poolConfig.connectionTimeoutMillis = 15000;
 
 // Bắt buộc sử dụng SSL khi kết nối tới Neon DB trên Production
-if (isProduction) {
+if (useDatabaseUrl) {
   poolConfig.ssl = {
     rejectUnauthorized: false, // Bắt buộc đối với Neon / cloud DB tự chứng thực
   };

@@ -281,37 +281,25 @@ Bình luận hỗ trợ chức năng trả lời lồng ghép nhiều cấp:
 
 ### Bước 3: Cài đặt Dependencies & Khởi chạy dự án
 
-Bạn cần khởi chạy đồng thời cả API Server (Backend) và Client App (Frontend).
+Từ thư mục gốc, cài đặt dependencies và chạy cả Backend + Frontend bằng một lệnh:
 
-#### 🟢 Khởi chạy Backend (API Server):
-1.  Mở terminal mới và di chuyển vào thư mục backend:
-    ```bash
-    cd backend
-    ```
-2.  Cài đặt các gói thư viện:
-    ```bash
-    npm install
-    ```
-3.  Chạy server ở chế độ phát triển (Development mode, hỗ trợ tự động reload khi sửa file):
-    ```bash
-    npm run dev
-    ```
-    *Server API mặc định chạy tại địa chỉ: `http://localhost:5000`*
+```bash
+npm install
+cd backend && npm install && cd ..
+npm run dev
+```
 
-#### 🔵 Khởi chạy Frontend (Next.js Client):
-1.  Mở một terminal khác và di chuyển đến thư mục gốc của dự án:
-    ```bash
-    cd ..   # Trở về thư mục gốc nếu đang ở backend
-    ```
-2.  Cài đặt các gói thư viện:
-    ```bash
-    npm install
-    ```
-3.  Chạy ứng dụng Next.js ở chế độ phát triển:
-    ```bash
-    npm run dev
-    ```
-    *Ứng dụng client mặc định hoạt động tại địa chỉ: `http://localhost:3000`*
+Lệnh này cố định các địa chỉ local:
+
+- Frontend (Next.js): `http://localhost:3000`
+- Backend API (Express): `http://localhost:5000`
+
+Nếu chỉ cần chạy riêng một service:
+
+```bash
+npm run dev:frontend  # Frontend tại port 3000
+npm run dev:backend   # Backend API tại port 5000
+```
 
 ---
 

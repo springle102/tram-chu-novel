@@ -5,8 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Image from "next/image";
 import logoImg from "@/app/logo.png";
 import Header from "@/app/components/Header";
-import dynamic from "next/dynamic";
-const LoginModal = dynamic(() => import("@/app/components/LoginModal"), { ssr: false });
+import LoginModal from "@/app/components/LoginModal";
 import type { User } from "@/app/types";
 
 export const runtime = 'edge';
@@ -68,10 +67,13 @@ interface Chapter {
   id: string;
   chapter_number: number;
   title: string;
-  content: string;
+  content: string | null;
   word_count: number;
   view_count: number;
   created_at: string;
+  is_password_protected?: boolean;
+  password_question?: string | null;
+  password_hint?: string | null;
 }
 
 interface ChapterSummary {
@@ -113,6 +115,10 @@ export default function ChapterReadingPage() {
   const [chaptersList, setChaptersList] = useState<ChapterSummary[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isChapterUnlocked, setIsChapterUnlocked] = useState(false);
+  const [enteredPassword, setEnteredPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [isUnlocking, setIsUnlocking] = useState(false);
 
   // ── Reader Settings ──
   const [fontSize, setFontSize] = useState(18); // default size in px
@@ -135,6 +141,10 @@ export default function ChapterReadingPage() {
 
   // ── Load Auth and Fetch Data on Mount/Params Change ──
   useEffect(() => {
+    setIsChapterUnlocked(false);
+    setEnteredPassword("");
+    setPasswordError("");
+
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
 
@@ -159,6 +169,7 @@ export default function ChapterReadingPage() {
         if (json.success && json.data) {
           setStory(json.data.story);
           setChapter(json.data.chapter);
+          setIsChapterUnlocked(!json.data.chapter.is_password_protected);
 
           // 2. Fetch comments for this chapter
           const commentsRes = await fetch(
@@ -188,6 +199,41 @@ export default function ChapterReadingPage() {
       loadData();
     }
   }, [slug, chapterNumber]);
+
+  async function handleUnlockSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!chapter || !enteredPassword.trim()) return;
+
+    setIsUnlocking(true);
+    setPasswordError("");
+
+    try {
+      const response = await fetch(
+        `${apiBaseUrl}/api/stories/${slug}/chapters/${chapterNumber}/unlock`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ password: enteredPassword }),
+          cache: "no-store",
+        }
+      );
+      const json = await response.json();
+
+      if (!response.ok || !json.success || !json.data?.chapter) {
+        setPasswordError(json.error || "Không thể mở khóa chương này.");
+        return;
+      }
+
+      setChapter(json.data.chapter);
+      setIsChapterUnlocked(true);
+      setEnteredPassword("");
+    } catch (err) {
+      console.error("Lỗi khi mở khóa chương:", err);
+      setPasswordError("Không thể kết nối tới hệ thống. Vui lòng thử lại.");
+    } finally {
+      setIsUnlocking(false);
+    }
+  }
 
   // ── Navigation Logic ──
   const currentIndex = chaptersList.findIndex((ch) => ch.chapter_number === currentChNum);
@@ -388,7 +434,7 @@ export default function ChapterReadingPage() {
       />
 
       {/* ── Reading Content Area ── */}
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-6 sm:px-6">
+      <main className="mx-auto min-w-0 w-full max-w-3xl flex-1 px-4 py-6 sm:px-6">
         
         {/* Breadcrumbs */}
         <div className="mb-6 flex flex-wrap gap-2 text-xs text-text-muted font-medium">
@@ -399,6 +445,70 @@ export default function ChapterReadingPage() {
           <span className="text-purple-900 font-semibold">Chương {chapter.chapter_number}</span>
         </div>
 
+        {chapter.is_password_protected && !isChapterUnlocked ? (
+          <section className="rounded-2xl bg-white p-6 md:p-10 shadow-sm border border-purple-100 text-center">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-purple-50 text-purple-600">
+              <svg className="h-7 w-7" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+            </div>
+            <p className="mt-5 text-xs font-semibold uppercase tracking-widest text-purple-600">Nội dung được bảo vệ</p>
+            <h1 className="mt-2 text-xl font-extrabold text-gray-900">
+              Chương {chapter.chapter_number}: {chapter.title}
+            </h1>
+            <p className="mx-auto mt-3 max-w-md text-sm text-gray-500">
+              Chương này đã được tác giả đặt mật khẩu. Vui lòng nhập đúng mật khẩu để tiếp tục đọc.
+            </p>
+
+            {chapter.password_question && (
+              <div className="mx-auto mt-5 max-w-md rounded-xl bg-purple-50/70 p-4 text-left">
+                <span className="block text-[10px] font-bold uppercase tracking-wider text-purple-600">Câu hỏi gợi ý</span>
+                <p className="mt-1 text-sm font-semibold text-gray-700">{chapter.password_question}</p>
+              </div>
+            )}
+
+            {chapter.password_hint && (
+              <p className="mx-auto mt-3 max-w-md text-xs text-amber-700">
+                <span className="font-bold">Gợi ý:</span> {chapter.password_hint}
+              </p>
+            )}
+
+            <form onSubmit={handleUnlockSubmit} className="mx-auto mt-6 max-w-sm space-y-3">
+              <label htmlFor="chapter-password" className="sr-only">Mật khẩu chương</label>
+              <input
+                id="chapter-password"
+                type="password"
+                required
+                autoComplete="current-password"
+                placeholder="Nhập mật khẩu chương..."
+                value={enteredPassword}
+                onChange={(e) => {
+                  setEnteredPassword(e.target.value);
+                  setPasswordError("");
+                }}
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-center text-sm font-semibold tracking-wider text-gray-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-1 focus:ring-purple-500"
+              />
+              {passwordError && <p className="text-xs font-semibold text-red-500">{passwordError}</p>}
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => router.push(`/stories/${slug}`)}
+                  className="flex-1 rounded-xl bg-gray-100 px-4 py-3 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-200"
+                >
+                  Mục lục
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUnlocking || !enteredPassword.trim()}
+                  className="flex-1 rounded-xl bg-purple-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-purple-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isUnlocking ? "Đang kiểm tra..." : "Mở khóa"}
+                </button>
+              </div>
+            </form>
+          </section>
+        ) : (
+          <>
         {/* ── Reader Control Settings Bar ── */}
         <div className={`mb-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 rounded-xl p-3 shadow-sm border backdrop-blur-sm ${settingsBarClasses[theme]}`}>
           {/* Font Sizes */}
@@ -437,7 +547,7 @@ export default function ChapterReadingPage() {
         </div>
 
         {/* ── Main Reading Card ── */}
-        <article className={`rounded-2xl p-6 md:p-10 shadow-sm border ${themeClasses[theme]} transition-colors duration-300`}>
+        <article className={`min-w-0 max-w-full rounded-2xl p-6 md:p-10 shadow-sm border ${themeClasses[theme]} transition-colors duration-300`}>
           {/* Header */}
           <header className="mb-8 text-center border-b border-border-light/20 pb-6">
             <h2 className="text-sm font-semibold text-purple-600 uppercase tracking-widest cursor-pointer hover:underline" onClick={() => router.push(`/stories/${slug}`)}>
@@ -453,8 +563,12 @@ export default function ChapterReadingPage() {
 
           {/* Reading text body */}
           <div 
-            style={{ fontSize: `${fontSize}px` }}
-            className="leading-relaxed whitespace-pre-wrap font-sans text-justify"
+            style={{
+              fontSize: `${fontSize}px`,
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
+            }}
+            className="reader-content leading-relaxed whitespace-pre-line font-sans text-justify"
           >
             {chapter.content}
           </div>
@@ -687,6 +801,8 @@ export default function ChapterReadingPage() {
             </div>
           )}
         </section>
+          </>
+        )}
       </main>
 
       {/* ── Login Modal Overlay ── */}
