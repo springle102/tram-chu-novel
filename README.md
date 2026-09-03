@@ -300,17 +300,3 @@ Nếu chỉ cần chạy riêng một service:
 npm run dev:frontend  # Frontend tại port 3000
 npm run dev:backend   # Backend API tại port 5000
 ```
-
----
-
-## 👥 Tài Khoản Thử Nghiệm Mặc Định (Test Accounts)
-
-Sau khi chạy lệnh `backend/init.sql`, cơ sở dữ liệu sẽ có sẵn một số tài khoản mẫu sau để bạn kiểm thử các luồng nghiệp vụ của hệ thống:
-
-| Vai trò (Role) | Email | Mật khẩu (Plain text) | Chức năng kiểm thử |
-| :--- | :--- | :--- | :--- |
-| **Admin** | `admin@novelviolet.com` | `123456` | Kiểm duyệt bình luận, quản lý người dùng, thay đổi thiết lập hệ thống |
-| **Author** | `tieuding@gmail.com` | `123456` | Bút danh *Tiêu Đỉnh*. Quản lý truyện *Tru Tiên Kiếp*, viết chương truyện mới, trả lời độc giả |
-| **Author** | `tieuho@gmail.com` | `123456` | Bút danh *Ngã Ăn Tây Hồng Thị*. Quản lý truyện *Bàn Long*, *Tinh Không Biến Thể* |
-| **Reader** | `reader_a@gmail.com` | `123456` | Tên *Nguyễn Văn A*. Đọc truyện, đánh giá, lưu tủ sách, bình luận |
-| **Reader** | `reader_b@gmail.com` | `123456` | Tên *Trần Thị B*. Đọc truyện, bình luận |
