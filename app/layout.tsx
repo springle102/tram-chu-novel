@@ -5,6 +5,7 @@ import FaviconSync from "./components/FaviconSync";
 import MaintenanceGuard from "./components/MaintenanceGuard";
 
 export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
 interface PublicSiteSetting {
   key: string;
